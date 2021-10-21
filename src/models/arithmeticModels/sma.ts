@@ -64,9 +64,9 @@ class SMA extends GenericModel {
   private calculateSMA(index: number) {
     const startInterval = index - this.step
     const endInterval = index + 1
-    const key = this.position === 'BUY' ? this.referenceParams.toBuy :  this.referenceParams.toSell
+    const key = this.getKey()
     const intervalValues = this.values.slice(startInterval, endInterval)
-    return intervalValues.reduce((total, curr) => total + curr[key as keyof Candle], 0) / this.window
+    return intervalValues.reduce((total, curr) => total + curr[key], 0) / this.window
   }
 
   private initialCalculate() {
@@ -135,6 +135,9 @@ class SMA extends GenericModel {
     this.values.push(newValue)
     lastIndex = this.values.length - 1
     const currentSMAValue = this.calculateSMA(lastIndex)
+    logger.log('MODELS', `SMA - last coin value ${newValue[key]}`)
+    logger.log('MODELS', `SMA - last sma value ${currentSMAValue}`)
+
     this.current.push(currentSMAValue)
     this.log()
   }

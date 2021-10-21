@@ -6,6 +6,9 @@ import App from './app'
 logger.log('APP', 'Starting...')
 
 const app = new App({
+  buyWith: 'BUSD', 
+  sellWith: 'ADA',
+  symbol: 'ADABUSD',
   window: 5,
   reference: {
     toBuy: 'low',

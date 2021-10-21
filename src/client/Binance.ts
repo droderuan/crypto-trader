@@ -4,7 +4,7 @@ import { Balance } from "../types/Wallet";
 import logger from "../utils/logger";
 
 interface historicalParams {
-  symbol: 'BTCUSDT'
+  symbol: coins
   interval: candleSize
   window?: window
 }

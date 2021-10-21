@@ -16,7 +16,7 @@ class Referee {
 
   action = {} as actions
   order: Order
-  currentPosition = 'BOUGHT'
+  currentPosition = 'EMPTY'
 
   constructor(minimumScoreToBuy: number, multiplier=1, lockFor=5, order: Order) {
     this.minimumScore = minimumScoreToBuy

@@ -1,5 +1,5 @@
 import BinanceClient from './client/Binance'
-import { Candle, candleSize, window } from './types/Candle'
+import { Candle, candleSize, coins, window } from './types/Candle'
 import logger from './utils/logger'
 import models from './models'
 import Order from './Core/Event'
@@ -7,6 +7,9 @@ import Wallet from './Core/Wallet'
 import Referee from './Core/Referee'
 
 interface AppConfig {
+  buyWith: string
+  sellWith: string
+  symbol: coins
   binanceApiKey: string
   binanceApiSecret: string
   modelName: keyof typeof models
@@ -27,18 +30,20 @@ class App {
     toBuy: keyof Candle | 'currentValue',
     toSell: keyof Candle | 'currentValue'
   }
+  private symbol
   private binanceClient
   private models
   private wallet
   private order
   private referee
 
-  constructor({window,reference, candleSize, updateInterval, binanceApiKey, binanceApiSecret, modelName}: AppConfig) {
+  constructor({window,reference,symbol,buyWith, sellWith, candleSize, updateInterval, binanceApiKey, binanceApiSecret, modelName}: AppConfig) {
     this.window = window
     this.updateInterval = updateInterval
     this.candleSize = candleSize
     this.models = models[modelName]
     this.reference = reference
+    this.symbol = symbol
 
     this.binanceClient = new BinanceClient({
       apiKey: binanceApiKey,
@@ -46,7 +51,7 @@ class App {
       useServerTime: true
     })
     
-    this.wallet = new Wallet(this.binanceClient)
+    this.wallet = new Wallet(this.binanceClient, this.symbol, buyWith, sellWith)
     this.order = new Order(
       {
         BUY: [
@@ -63,7 +68,7 @@ class App {
 
   async start(cb: Function) {
       try {
-        const candles = await this.binanceClient.getHistorical({ symbol: 'BTCUSDT', interval: this.candleSize, window: this.window })
+        const candles = await this.binanceClient.getHistorical({ symbol: this.symbol, interval: this.candleSize, window: this.window })
         if (!candles) {
           logger.log('ERROR', 'Error while loading initial data')
           throw Error('No initial candle')
@@ -85,7 +90,7 @@ class App {
         
         logger.log("APP", "Updating the price")
         try {
-          const candle = await this.binanceClient.getLastCandle({ symbol: 'BTCUSDT', interval: this.candleSize })
+          const candle = await this.binanceClient.getLastCandle({ symbol: this.symbol, interval: this.candleSize })
           if (!candle) {
             return
           }

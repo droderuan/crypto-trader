@@ -10,16 +10,20 @@ class Wallet {
   binanceClient: BinanceClient
   currentValue = 0
   lastTradedValue = 0
-  symbolPrecision = 5
-  buyWith = 'USDT'
-  sellWith = 'BTC'
+  symbolPrecision = 1
+  symbol = '' as coins
+  buyWith = ''
+  sellWith = ''
 
-  constructor(binanceClient: BinanceClient) {
+  constructor(binanceClient: BinanceClient, symbol: coins, buyWith: string,sellWith: string ) {
     this.binanceClient = binanceClient
+    this.symbol = symbol
+    this.buyWith = buyWith
+    this.sellWith = sellWith
   }
 
   write(type: string, diff: number) {
-    fs.appendFile("/home/ruan/Code/projects/cryptoTrader/tmp/log", `${type} ${this.currentValue} ${(diff*100).toFixed(2)}% ${String(new Date()).slice(8, 33)}\r\n`, function(err) {
+    fs.appendFile("/home/ruan/Code/projects/cryptoTrader/tmp/log", `${this.symbol} ${type} ${this.currentValue} ${(diff*100).toFixed(2)}% ${String(new Date()).slice(8, 33)}\r\n`, function(err) {
       if(err) {
           return console.log(err);
       }
@@ -53,6 +57,7 @@ class Wallet {
       this.currentValue = await this.binanceClient.currentPrice(coin)
       const quantityWithoufix = Number(this.balance[this.buyWith].available) / this.currentValue
       const quantity = this.fixeNumber(quantityWithoufix)
+      logger.log('WALLET', `${quantity} of ${this.buyWith}`)
       logger.log('WALLET', `Buying ${this.balance[this.buyWith].available} ${this.buyWith} of ${this.sellWith}`)
       await this.binanceClient.createBuyOrder(coin, quantity, this.currentValue)
       this.logging('BUY')
@@ -72,9 +77,9 @@ class Wallet {
       await this.updateBalance()
       const coin = this.sellWith+this.buyWith as coins
       const quantity = this.fixeNumber(Number(this.balance[this.sellWith].available))
-
-      if(quantity >= 0.00001){
-        this.currentValue = await this.binanceClient.currentPrice('BTCUSDT')
+      logger.log('WALLET', `${quantity} of ${this.sellWith}`)
+      if(quantity >= 0.1){
+        this.currentValue = await this.binanceClient.currentPrice(this.symbol)
 
         logger.log('WALLET', `Selling ${quantity} of ${this.sellWith}`)
 
