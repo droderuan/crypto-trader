@@ -3,160 +3,101 @@ import logger from "../../utils/logger"
 import GenericModel from "../genericModel"
 
 class SMA extends GenericModel {
-  private values: Candle[] = []
+  private candles: Candle[] = []
   private window: number = 0
   private step: number = 0
-  private position: string = ''
-  private referenceParams: {
-    toBuy: keyof Candle| 'currentValue',
-    toSell: keyof Candle| 'currentValue'
-  } = {
-    toBuy: 'high',
-    toSell: 'low'
-  }
-  current: number[] = []
+  private candleReferenceValue: keyof Candle  = 'close'
+  smaValues: number[] = []
 
-  config(initialValues: Candle[], window: number, parameter: {
-    toBuy: keyof Candle | 'currentValue',
-    toSell: keyof Candle | 'currentValue'
-  }) {
+  config(initialValues: Candle[], window: number) {
     logger.log('MODELS', `SMA - initializing`)
 
-    this.values = initialValues
+    this.candles = initialValues
     this.window = window
     this.step = window - 1
-    this.referenceParams = parameter
     this.initialCalculate()
+
     logger.log('MODELS', `SMA - initialized`)
   }
 
-  checkIfIsBelow() {
-    const currentSMA = this.current.slice(this.current.length - this.window)
-    const currentValues = this.values.slice(this.current.length - this.window)
-    const key = this.getKey()
-    const comparedValues = currentValues.map((candle, index) => {
-      const smaValue = currentSMA[index]
-      if (candle[key] > smaValue){
-        return 'above'
-      } else if (candle[key] < smaValue) {
-        return 'below'
-      } else {
-        return 'equal'
-      }
-    })
-    const lastIndex =  comparedValues.length-1
-
-    if (comparedValues[0] === 'above' && comparedValues[lastIndex] === 'above') {
-      return false
-    }
-    if (comparedValues[0] === 'below' && comparedValues[lastIndex] === 'above') {
-      return false
-    }
-    if (comparedValues[0] === 'above' && comparedValues[lastIndex] === 'below') {
-      return true
-    }
-    if (comparedValues[0] === 'below' && comparedValues[lastIndex] === 'below') {
-      return true
-    }
-    return currentSMA[lastIndex] > currentValues[lastIndex][key] ? true : false
-  }
-
-  private calculateSMA(index: number) {
+  private calculate(index: number) {
     const startInterval = index - this.step
     const endInterval = index + 1
-    const key = this.getKey()
-    const intervalValues = this.values.slice(startInterval, endInterval)
-    return intervalValues.reduce((total, curr) => total + curr[key], 0) / this.window
+    const intervalValues = this.candles.slice(startInterval, endInterval)
+    return intervalValues.reduce((total, curr) => total + curr[this.candleReferenceValue], 0) / this.window
   }
 
   private initialCalculate() {
-    if (this.values.length < this.window) {
+    if (this.candles.length < this.window) {
       throw new Error(`Not enough data for a ${window} window`)
     }
 
-    this.current = this.values.map((_, index) => {
+    this.smaValues = this.candles.map((_, index) => {
       if (index < this.step) {
         return 0
       }
-      return this.calculateSMA(index)
+      return this.calculate(index)
     })
   }
 
-  opinion() {
-    const currentWindow = this.current.slice(this.current.length - this.window - 1)
-    
-    let positive = 0
-    let negative = 0
-
-    currentWindow.forEach((value, index, allCandle) => {
-      if(index===0) {
-        return null
-      }
-      const increased = value / allCandle[index-1]
-      if (increased > 1){
-        ++positive
-      } else if( increased < 1) {
-        ++negative
-      }
-    })
-    if (positive === this.window) {
-      return "STRONG BUY"
-    } else if (positive > negative) {
-      return "BUY"
-    } else if (positive === negative) {
-      return "SUPPORT"
-    } else if (positive < negative) {
-      return "SELL"
-    } else {
-      return "STRONG SELL"
-    }
-
-  }
-  
-  private getKey() {
-    return this.position === 'BUY' ? this.referenceParams.toSell as keyof Candle :  this.referenceParams.toBuy as keyof Candle
-  }
-
-  updatePosition (position: 'BUY' | 'SELL') {
-    this.position = position
+  updateCandleReferenceValue (referenceValue: keyof Candle) {
+    this.candleReferenceValue = referenceValue
     this.initialCalculate()
   }
 
-  update(newValue: Candle) {
-    logger.log('MODELS', `SMA - updating...`)
-    const key = this.getKey()
-    logger.log('MODELS', `SMA - using ${key} price`)
-    let lastIndex = this.values.length - 1
+  verifyOpportunity(candle: Candle): 'TO_BUY' | 'TO_SELL' | 'NOTHING' {
+    logger.log('MODELS', `SMA - checking if candle is above or below`)
+    this.log()
+    const lastSmaValue = this.smaValues[this.smaValues.length-1]
+    if (candle[this.candleReferenceValue] > lastSmaValue) {
+      return 'TO_BUY'
+    } else if (candle[this.candleReferenceValue] < lastSmaValue) {
+      return 'TO_SELL'
+    }
+    return 'NOTHING'
+  }
 
-    if (this.values[lastIndex][key] === newValue[key]){
+  update(newCandle: Candle) {
+    logger.log('MODELS', `SMA - updating model..`)
+
+    let lastIndex = this.candles.length - 1
+    if (this.candles[lastIndex][this.candleReferenceValue] === newCandle[this.candleReferenceValue]){
       logger.log('MODELS', `SMA - no changes`)
+      this.log()
       return
     }
-    this.values.push(newValue)
-    lastIndex = this.values.length - 1
-    const currentSMAValue = this.calculateSMA(lastIndex)
-    logger.log('MODELS', `SMA - last coin value ${newValue[key]}`)
+
+    this.candles.push(newCandle)
+    ++lastIndex
+
+    const currentSMAValue = this.calculate(lastIndex)
+
+    logger.log('MODELS', `SMA - last coin value ${newCandle[this.candleReferenceValue]}`)
     logger.log('MODELS', `SMA - last sma value ${currentSMAValue}`)
 
-    this.current.push(currentSMAValue)
+    this.smaValues.push(currentSMAValue)
     this.log()
   }
 
   currentSMA() {
-    const current = this.current.slice(this.current.length - this.window)
+    const current = this.smaValues.slice(this.smaValues.length - this.window)
     
     return current.join(' - ')
   }
 
   log() {
-    const current = this.values.slice(this.current.length - this.window)
-    const key = this.getKey()
+    const currentCandle = this.candles.slice(this.smaValues.length - this.window)
 
-    const parsed = current.reduce((str, candle) => {
-      return `${str}-${candle[key]}`
+    const parsed = currentCandle.reduce((str, candle) => {
+      return str.length > 1 ? `${str} - ${candle[this.candleReferenceValue]}` : String(candle[this.candleReferenceValue])
     }, '')
-    console.table([{ "current SMA": this.currentSMA(), "Last high": this.values[this.values.length-1].high }])
-    console.table([{ "current prices": parsed, "Last high": current[this.current.length-1][key] }])
+
+    logger.log('MODELS', `SMA - using ${this.candleReferenceValue} price`)
+    console.table({
+      "current SMA": this.currentSMA(),
+      "current prices": parsed, 
+      [`Last ${this.candleReferenceValue}`]: currentCandle[currentCandle.length-1][this.candleReferenceValue]
+    })
   }
 }
 

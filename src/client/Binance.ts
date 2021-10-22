@@ -1,12 +1,13 @@
 import Binance from "node-binance-api";
-import { Candle, candleSize, coins, window } from "../types/Candle";
+import { Candle, CandleSize, Coins, Window } from "../types/Candle";
+import { Order } from "../types/Order";
 import { Balance } from "../types/Wallet";
 import logger from "../utils/logger";
 
 interface historicalParams {
-  symbol: coins
-  interval: candleSize
-  window?: window
+  symbol: Coins
+  interval: CandleSize
+  window?: Window
 }
 
 class BinanceClient {
@@ -56,7 +57,7 @@ class BinanceClient {
     });
   }
 
-  async getLastCandle({ symbol, interval = '5m' }: historicalParams): Promise<null | Candle[]> {
+  async getLastCandle({ symbol, interval = '5m' }: historicalParams): Promise<null | Candle> {
     logger.log('BINANCE CLIENT', `getting last candle of ${symbol} with size ${interval}`)
     return new Promise((resolve, reject) => {
     this.client.candlesticks(symbol, interval, (error: any, ticks: any[], symbol: any) => {
@@ -66,14 +67,14 @@ class BinanceClient {
       }
 
       const parsedTicks = ticks.map((tick: any) => this.parseToCandle(tick))
-      resolve(parsedTicks)
+      resolve(parsedTicks[0])
       return
     }, { limit: 1 });
   })
 
   }
 
-  async currentPrice(symbol: coins): Promise<number>{
+  async currentPrice(symbol: Coins): Promise<number>{
     return new Promise((resolve, reject) => {
       logger.log('BINANCE CLIENT', `Getting current value of ${symbol}`)
       this.client.prices(symbol, (error: any, ticker: {[key: string]: string}) => {
@@ -104,17 +105,61 @@ class BinanceClient {
     })
   }
 
-  async createBuyOrder(coin: coins, quantity: number, price: number) {
-      await this.client.buy(coin, quantity, price)
+  async createBuyOrder(coin: Coins, quantity: number, price: number): Promise<Order> {
+    logger.log('BINANCE CLIENT', `Creating a buy order`)
+    
+    return new Promise((resolve, reject) => {
+      this.client.buy(coin, quantity, price, {type:'LIMIT'}, (error, response: Order) => {
+        if(error) {
+          reject(error)
+          return
+        };
+        logger.log('BINANCE CLIENT', `Buy order finish`)
+        logger.log('BINANCE CLIENT', `Buy order: ${response.orderId}`)
+
+        resolve(response)
+        return
+      })
+
+    })  
   }
 
-  async createSellOrder(coin: coins, quantity: number, price: number) {
-      await this.client.sell(coin, quantity, price)
+  async createSellOrder(coin: Coins, quantity: number, price: number): Promise<Order> {
+    logger.log('BINANCE CLIENT', `Creating a sell order`)
+    return new Promise((resolve, reject) => {
+      this.client.sell(coin, quantity, price, {type:'LIMIT'}, (error, response: Order) => {
+        if(error) {
+          reject(error)
+          return
+        };
+        logger.log('BINANCE CLIENT', `Sell order finish`)
+        logger.log('BINANCE CLIENT', `Sell order: ${response.orderId}`)
+
+        resolve(response)
+        return
+      })
+    })  
   }
 
-  async symbolInfo(coin: string) {
-
+  async orderStatus(order: Order): Promise<Order> {
+    logger.log('BINANCE CLIENT', `Checking order status: ${order.orderId}`)
+    return this.client.orderStatus(order.symbol, order.orderId)  
   }
+
+  async cancelOrder(order: Order): Promise<void> {
+    logger.log('BINANCE CLIENT', `Canceling order ${order.orderId}`)
+    return new Promise((resolve, reject) => {
+      this.client.cancel(order.symbol, order.orderId, (error: any, response: Promise<Order['status']>) => {
+        if(error) {
+          reject(error)
+          return
+        };
+      logger.log('BINANCE CLIENT', `Order canceled: ${order.orderId}`)
+
+      })
+    })  
+  }
+
 }
 
 export default BinanceClient

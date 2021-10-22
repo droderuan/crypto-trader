@@ -1,4 +1,3 @@
-import main from './app'
 import logger from './utils/logger'
 import env from './utils/env'
 import App from './app'
@@ -9,14 +8,18 @@ const app = new App({
   buyWith: 'BUSD', 
   sellWith: 'ADA',
   symbol: 'ADABUSD',
+  startPosition: 'EMPTY',
   window: 5,
   reference: {
     toBuy: 'low',
     toSell: 'high'
   },
-  candleSize: '15m',
+  candleSize: '5m',
   modelName: 'sma',
-  updateInterval: 60000,
+  candleInterval: 300000,
+  updateInterval: 150000,
+  coinPrecision: 1,
+  coinStep: 0.1,
   binanceApiKey: env.binanceApiKey,
   binanceApiSecret: env.binanceApiSecret
 })
@@ -24,5 +27,6 @@ const app = new App({
 app.start(() => {
   logger.log('APP', 'Started app')
   app.startObserve()
+  app.startIntervalCheck()
 })
 

@@ -1,1 +1,1 @@
-export type opinion = "STRONG BUY" | "BUY" | "SUPPORT" | "SELL" | "STRONG SELL" 
+export type Opinion = "STRONG BUY" | "BUY" | "SUPPORT" | "SELL" | "STRONG SELL" 
