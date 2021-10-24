@@ -1,10 +1,10 @@
-import BinanceClient from "../client/Binance";
-import logger from "../utils/logger";
 import fs from 'fs'
-import { Balance } from "../types/Wallet";
-import { Coins } from "../types/Candle";
-import { Order, OrderEmitterTypes } from "../types/Order";
-import OrderEventEmitter from "./Event";
+import BinanceClient from "../client/binance/Binance";
+import logger from "../../utils/logger";
+import { Balance } from "../../types/Wallet";
+import { Coins } from "../../types/Candle";
+import { Order, OrderEmitterTypes } from "../../types/Order";
+import OrderEventEmitter from "../event/Event";
 
 interface WalletConfig {
   binanceClient: BinanceClient,
@@ -89,7 +89,7 @@ class Wallet {
         }
       })
     } catch(err) {
-      logger.log('ERROR', 'on try to buy')
+      logger.log('WALLET', 'on try to buy')
       setTimeout(() => {
         logger.log('ERROR', 'trying again to buy')
         
@@ -98,7 +98,6 @@ class Wallet {
   }
 
   async sell(cb?: Function) {
-    this.lastTradedValue = this.currentValue
     try {
       await this.updateBalance()
       const coin = this.sellWith+this.buyWith as Coins
@@ -110,6 +109,7 @@ class Wallet {
         this.lastOrder = await this.binanceClient.createSellOrder(coin, quantity, this.currentValue)
         this.awaitOrderToFill((orderStatus) => {
           if(orderStatus === 'FILLED'){
+            this.lastTradedValue = this.currentValue
             this.logging('SELL')
             cb && cb()
           }
@@ -117,38 +117,49 @@ class Wallet {
       }
     } catch (err) {
       setTimeout(() => {
-        logger.log('ERROR', 'trying again to sell')
+        logger.log('WALLET', 'trying again to sell')
         
         this.sell()
       }, 2000)
       console.log(err)
 
-      logger.log('ERROR', 'on try to sell')
+      logger.log('WALLET', 'on try to sell')
     }
   }
 
   async awaitOrderToFill(cb: (status: 'FILLED' | 'NOT_FILLED') => void ) {
     logger.log('WALLET', `Waiting for order to finish: ${this.lastOrder.orderId}`)
-
+    
     const interval = setInterval(async () => {
-      logger.log('WALLET', `Checking order: ${this.lastOrder.orderId}`)
-
+      logger.log('WALLET', `Tries: ${this.orderStatusCheckCount}`)
+      
       if (this.orderStatusCheckCount >= 5) {
-        this.cancelOrder()
-        clearInterval(interval)
-        cb('NOT_FILLED')
+        logger.log('WALLET', `Max wait time of order to fill achieved`)
+        logger.log('WALLET', `Order unfilled: ${this.lastOrder.orderId}`)
+        this.orderStatusCheckCount = 1
+        try{
+            clearInterval(interval)
+            await this.cancelOrder()
+            cb('NOT_FILLED')
+          } catch (err) {
+            logger.log('WALLET', `Erro while canceling order: ${this.lastOrder.orderId}`)
+            logger.log('WALLET', `Considering order filled`)
+            console.log(err)
+            cb('FILLED')
+          }
       } else{
         const order = this.lastOrder
         try{
-
           const updatedOrder = await this.binanceClient.orderStatus(order)
-          if(updatedOrder.status === 'FILLED' || updatedOrder.status === 'CANCELED') {
-            logger.log('WALLET', `Order filled: ${order.orderId}`)
+          if(updatedOrder.status === 'FILLED') {
+            logger.log('WALLET', `Order ${updatedOrder.status}: ${order.orderId}`)
             cb('FILLED')
             clearInterval(interval)
+            this.orderStatusCheckCount = 1
           } else {
             this.orderStatusCheckCount += 1
           }
+
         }catch(err) {
           logger.log('WALLET', 'error while trying to update order status')
         }
@@ -157,10 +168,8 @@ class Wallet {
   }
 
   async cancelOrder() {
+    await this.binanceClient.cancelOrder(this.lastOrder)
     this.orderEvent.emitter('REVERT')
-    this.orderStatusCheckCount = 1
-    this.binanceClient.cancelOrder(this.lastOrder)
-    logger.log('WALLET', `Order unfilled: ${this.lastOrder.orderId}`)
   }
 
   async updateBalance() {

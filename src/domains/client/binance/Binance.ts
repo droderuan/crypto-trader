@@ -1,8 +1,8 @@
 import Binance from "node-binance-api";
-import { Candle, CandleSize, Coins, Window } from "../types/Candle";
-import { Order } from "../types/Order";
-import { Balance } from "../types/Wallet";
-import logger from "../utils/logger";
+import { Candle, CandleSize, Coins, Window } from "../../../types/Candle";
+import { Order } from "../../../types/Order";
+import { Balance } from "../../../types/Wallet";
+import logger from "../../../utils/logger";
 
 interface historicalParams {
   symbol: Coins
@@ -49,7 +49,14 @@ class BinanceClient {
           reject(error)
           return
         }
-        const parsedTicks = ticks.map((tick: any) => this.parseToCandle(tick))
+        const parsedTicks = ticks.map((tick: any) => {
+          const parsedCandle = this.parseToCandle(tick)
+
+          return {
+            ...parsedCandle,
+            current: parsedCandle.close
+          }
+        })
 
         resolve(parsedTicks)
         return 
@@ -60,13 +67,18 @@ class BinanceClient {
   async getLastCandle({ symbol, interval = '5m' }: historicalParams): Promise<null | Candle> {
     logger.log('BINANCE CLIENT', `getting last candle of ${symbol} with size ${interval}`)
     return new Promise((resolve, reject) => {
-    this.client.candlesticks(symbol, interval, (error: any, ticks: any[], symbol: any) => {
+    this.client.candlesticks(symbol, interval, async (error: any, ticks: any[], symbol: any) => {
       if (error) {
         reject(error)
         return
       }
 
-      const parsedTicks = ticks.map((tick: any) => this.parseToCandle(tick))
+      const currentPrice = await this.currentPrice(symbol)
+
+      const parsedTicks = ticks.map((tick: any) => ({
+        ...this.parseToCandle(tick),
+        current: currentPrice
+      }))
       resolve(parsedTicks[0])
       return
     }, { limit: 1 });
@@ -148,16 +160,8 @@ class BinanceClient {
 
   async cancelOrder(order: Order): Promise<void> {
     logger.log('BINANCE CLIENT', `Canceling order ${order.orderId}`)
-    return new Promise((resolve, reject) => {
-      this.client.cancel(order.symbol, order.orderId, (error: any, response: Promise<Order['status']>) => {
-        if(error) {
-          reject(error)
-          return
-        };
-      logger.log('BINANCE CLIENT', `Order canceled: ${order.orderId}`)
-
-      })
-    })  
+    this.client.cancel(order.symbol, order.orderId)
+    logger.log('BINANCE CLIENT', `Order canceled: ${order.orderId}`)
   }
 
 }

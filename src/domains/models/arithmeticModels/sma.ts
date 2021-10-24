@@ -1,20 +1,28 @@
-import { Candle } from "../../types/Candle"
+import { Candle, Window } from "../../types/Candle"
 import logger from "../../utils/logger"
 import GenericModel from "../genericModel"
+
+export interface SmaConfig {
+  window: Window
+  reference: {
+    toBuy: keyof Candle | 'current',
+    toSell: keyof Candle | 'current'
+  }
+}
 
 class SMA extends GenericModel {
   private candles: Candle[] = []
   private window: number = 0
   private step: number = 0
-  private candleReferenceValue: keyof Candle  = 'close'
+  private candleReferenceValue: keyof Candle | 'current'  = 'close'
   smaValues: number[] = []
 
-  config(initialValues: Candle[], window: number) {
+  config(initialValues: Candle[], params: SmaConfig) {
     logger.log('MODELS', `SMA - initializing`)
 
     this.candles = initialValues
-    this.window = window
-    this.step = window - 1
+    this.window = params.window
+    this.step = params.window - 1
     this.initialCalculate()
 
     logger.log('MODELS', `SMA - initialized`)
@@ -40,7 +48,7 @@ class SMA extends GenericModel {
     })
   }
 
-  updateCandleReferenceValue (referenceValue: keyof Candle) {
+  updateCandleReferenceValue (referenceValue: keyof Candle | 'current') {
     this.candleReferenceValue = referenceValue
     this.initialCalculate()
   }
@@ -57,13 +65,13 @@ class SMA extends GenericModel {
     return 'NOTHING'
   }
 
-  update(newCandle: Candle) {
+  update(newCandle: Candle, log=true) {
     logger.log('MODELS', `SMA - updating model..`)
 
     let lastIndex = this.candles.length - 1
     if (this.candles[lastIndex][this.candleReferenceValue] === newCandle[this.candleReferenceValue]){
       logger.log('MODELS', `SMA - no changes`)
-      this.log()
+      log && this.log()
       return
     }
 
@@ -76,7 +84,11 @@ class SMA extends GenericModel {
     logger.log('MODELS', `SMA - last sma value ${currentSMAValue}`)
 
     this.smaValues.push(currentSMAValue)
-    this.log()
+    log && this.log()
+  }
+
+  lastSma() {
+    return this.smaValues[this.smaValues.length -1]
   }
 
   currentSMA() {

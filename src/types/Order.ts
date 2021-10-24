@@ -45,7 +45,7 @@ export interface Order {
   price: string,
   origQty: string,
   executedQty: string,
-  status: 'FILLED' | 'ACTIVE' | 'CANCELED',
+  status: 'NEW' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELED' | 'REJECTED',
   timeInForce: 'GTC',
   type: 'LIMIT',
   side: 'BUY' | 'SELL'

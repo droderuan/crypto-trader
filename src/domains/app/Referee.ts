@@ -1,7 +1,7 @@
 import { modelDecision } from "../models/genericModel"
-import { Opinion } from "../types/Decision"
-import logger from "../utils/logger"
-import Order from "./Event"
+import { Opinion } from "../../types/Decision"
+import logger from "../../utils/logger"
+import Order from "../event/Event"
 
 export type Position = 'BOUGHT' | 'EMPTY'
 

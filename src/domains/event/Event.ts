@@ -1,5 +1,5 @@
-import { OrderBuyParams, OrderEmitterTypes, OrderRevertParams, OrderSellParams, setBuyListener, setRevertListener, setSellListener } from "../types/Order";
-import logger from "../utils/logger";
+import { OrderBuyParams, OrderEmitterTypes, OrderRevertParams, OrderSellParams, setBuyListener, setRevertListener, setSellListener } from "../../types/Order";
+import logger from "../../utils/logger";
 
 type Listeners = {
   'BUY': ((input: OrderBuyParams) => void)[]
