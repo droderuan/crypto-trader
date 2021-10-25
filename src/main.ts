@@ -33,8 +33,9 @@ logger.log('APP', 'Starting...')
 // })
 
 export const botConfig = new BotConfig({
-  pair: 'ADABUSD',
-  candleSize: '5m',
+  pair: 'BTCBUSD',
+  candleSize: '1m',
+  startPosition: 'EMPTY',
   strategy: {
     name: 'Simple SMA',
     config: {
@@ -49,11 +50,10 @@ export const botConfig = new BotConfig({
   updateInterval: 300,
 })
 
-
 export const binanceClient = new BinanceClient({
   apiKey: env.binanceApiKey,
   apiSecret: env.binanceApiSecret,
-  useServerTime: true
+  useServerTime: true,
 })
 
 const app = new App(botConfig)

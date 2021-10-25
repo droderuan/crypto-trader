@@ -1,20 +1,18 @@
-import { Candlestick, Window } from '../../types/Candle'
-import strategies from '../strategies'
-import logger from '../../utils/logger'
 import OrderEventEmitter from '../event/Event'
-import Referee from '../observer/Referee'
-import BotConfig, { StrategieConfig } from './BotConfig'
-import { binanceClient } from '../../main'
-import UserWalletService from '../services/WalletUserService'
+import BotConfig from './BotConfig'
 import CryptoAppService from '../services/cryptoAppService'
-import AppError from '../../utils/AppError'
 import { StrategieBuilder } from '../strategies/StrategieBuilder'
+import OrderService from '../services/OrderService'
 
 class App {
   botConfig: BotConfig
+  orderEvent: OrderEventEmitter
+  orderService: OrderService
 
   constructor(botConfig: BotConfig) {
     this.botConfig = botConfig
+    this.orderEvent = new OrderEventEmitter()
+    this.orderService = new OrderService()
   }
 
   async start(cb?: Function) {
@@ -23,6 +21,8 @@ class App {
 
     await cryptoApp.setPairInfo(pair)
     cryptoApp.setConfig(this.botConfig)
+    cryptoApp.setOrderEvent(this.orderEvent)
+    cryptoApp.setOrderService(this.orderService)
 
     const strategieBuilder = new StrategieBuilder()
     const strategy = await strategieBuilder.build({
@@ -33,7 +33,9 @@ class App {
 
     cryptoApp.setStrategie(strategy)
 
-    cryptoApp.init()
+    await cryptoApp.init().catch(err => {
+      console.log(err)
+    })
   }
 }
 

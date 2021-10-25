@@ -1,5 +1,7 @@
 import { binanceClient } from "../../main";
 import { PairInfo } from "../../types/Pair";
+import AppError from "../../utils/AppError";
+import logger from "../../utils/logger";
 
 interface CreateOrder{
   PairInfo: PairInfo,
@@ -7,16 +9,48 @@ interface CreateOrder{
 }
 
 class OrderService {
-  async create({PairInfo}: CreateOrder){
-    const pair = PairInfo.pair
+
+  private fixeNumber(number: number, precisionRound: number): number {
+    if(String(number).indexOf('.') !== -1){
+      const splitted = String(number).split('.')
+      const fixed = splitted[1].slice(0, precisionRound)
+      return Number(splitted[0]+'.'+fixed)
+    } 
+    return number
+  }
+
+  async createBuyOrder({ PairInfo, quantity }: CreateOrder){
+    const {pair, precisionRound, buyCoin, minQty} = PairInfo
+
     const currentValue = await binanceClient.currentPrice(pair)
-    const quantityWithoufix = Number(this.balance[this.buyWith].available) / this.currentValue
-    const quantity = this.fixeNumber(quantityWithoufix)
+    const quantityWithoufix = quantity / currentValue
+    const fixedQuantity = this.fixeNumber(quantityWithoufix, precisionRound)
 
-    logger.log('WALLET', `${this.balance[this.buyWith].available} of ${this.buyWith}`)
-    logger.log('WALLET', `Buying ${quantity} ${this.buyWith} of ${this.sellWith}`)
+    logger.log('ORDER SERVICE', `Buying ${quantity} ${buyCoin} of ${pair} at ${currentValue}`)
+        
+    if (fixedQuantity < minQty) {
+      throw new AppError('CREATE BUY ORDER', `Quantity ${quantity} is less than minimum: ${minQty}`)
+    }
 
-    this.lastOrder = await this.binanceClient.createBuyOrder(pair, quantity, this.currentValue)
+    try {
+      await binanceClient.createBuyOrder(pair, fixedQuantity, currentValue)
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  async createSellOrder({ PairInfo, quantity }: CreateOrder){
+    const {pair, precisionRound, sellCoin, minQty} = PairInfo
+    const currentValue = await binanceClient.currentPrice(pair)
+    const fixedQuantity = this.fixeNumber(quantity, precisionRound)
+
+    if (fixedQuantity < minQty) {
+      throw new AppError('CREATE SELL ORDER', `Quantity ${quantity} is less than minimum: ${minQty}`)
+    }
+
+    logger.log('ORDER SERVICE', `Selling ${quantity} ${sellCoin} of ${pair} at ${currentValue}`)
+
+    await binanceClient.createSellOrder(pair, fixedQuantity, currentValue)
   }
 }
 

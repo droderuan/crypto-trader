@@ -10,7 +10,8 @@ export class SymbolParser {
         throw new AppError('SYMBOL_PARSER', 'No LOT_SIZE fitler find')
       }
 
-      const precision = String(parseFloat(lotSize.stepSize)).split('.')[1].length
+      const coinBuyPrecision: string | undefined = String(parseFloat(lotSize.stepSize)).split('.')[1]
+      const precision = coinBuyPrecision ? coinBuyPrecision.length : 0
 
       return {
         pair: value.symbol,
@@ -19,7 +20,7 @@ export class SymbolParser {
         sellCoin: value.baseAsset,
         sellCoinPrecision: value.baseAssetPrecision,
         maxQty: parseFloat(lotSize.maxQty),
-        minQty: parseFloat(lotSize.maxQty),
+        minQty: parseFloat(lotSize.minQty),
         stepSize: parseFloat(lotSize.stepSize),
         status: value.status,
         precisionRound: precision

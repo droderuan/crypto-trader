@@ -1,14 +1,14 @@
 import { StrategyDecision } from "../strategies/types/GenericStrategy"
 import logger from "../../utils/logger"
-import Order from "../event/Event"
+import OrderEventEmitter from "../event/Event"
 
 export type Position = 'BOUGHT' | 'EMPTY'
 
 class Referee {
-  orderEventEmitter: Order
-  currentPosition: Position = 'BOUGHT'
+  orderEventEmitter: OrderEventEmitter
+  currentPosition: Position
 
-  constructor(currentPosition: Position, order: Order) {
+  constructor(currentPosition: Position, order: OrderEventEmitter) {
     this.orderEventEmitter = order
     this.currentPosition = currentPosition
   }
@@ -29,26 +29,28 @@ class Referee {
         break
       default:
         logger.log('REFEREE', 'Doing nothing...')
+        break
     }
   }
 
   emitBuyOrder() {
     if (this.currentPosition === 'BOUGHT') {
       logger.log('REFEREE', `Already in BOUGHT`)
-      return logger.log('REFEREE', 'Doing nothing...')
+      logger.log('REFEREE', 'Doing nothing...')
+      return
     }
-    this.orderEventEmitter.emitter('BUY')
     this.currentPosition = 'BOUGHT'
+    this.orderEventEmitter.emitter('BUY')
   }
 
   emitSellOrder() {
     if (this.currentPosition === 'EMPTY') {
       logger.log('REFEREE', `Already in EMPTY`)
-      return logger.log('REFEREE', 'Doing nothing...')
+      return
    }
 
-   this.orderEventEmitter.emitter('SELL')
    this.currentPosition = 'EMPTY'
+   this.orderEventEmitter.emitter('SELL')
   }
 
   reverse() {

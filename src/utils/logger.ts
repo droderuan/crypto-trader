@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-type AppModules = 'APP'| 'BINANCE CLIENT' | 'INDICATOR' | 'EVENT' | 'WALLET' | 'ERROR' | 'REFEREE' | 'STRATEGIE' | 'STRATEGIE BUILDER' | 'CRYPTO APP'
+type AppModules = 'APP' | 'BINANCE CLIENT' | 'INDICATOR' | 'EVENT' | 'WALLET' | 'ERROR' | 'REFEREE' | 'STRATEGIE' | 'STRATEGIE BUILDER' | 'CRYPTO APP' | 'ORDER SERVICE'
 
 const colors = {
   app: chalk.bold.hex('#fafafa'),
@@ -10,8 +10,9 @@ const colors = {
   cryptoApp: chalk.hex('#cddc39'),
   strategie: chalk.hex('#b85cff'),
   wallet: chalk.hex('#b0fcff'),
-  referee: chalk.hex('#3949ab'),
-  indicator: chalk.hex('#039be5')
+  referee: chalk.hex('#a1887f'),
+  indicator: chalk.hex('#039be5'),
+  orderService: chalk.hex('#a5d6a7')
 }
 
 const logger =  {
@@ -30,7 +31,7 @@ const logger =  {
         console.log(colors.error(`[${from}] ${message}`))
         break
       case 'EVENT':
-        console.log(colors.event(`[${from}] ${message}`))
+        console.log(chalk.hex('#000').bgYellow(`[${from}]`) + colors.event(` ${message}`))
         break
       case 'INDICATOR':
         console.log(colors.indicator(`[${from}] ${message}`))
@@ -46,6 +47,9 @@ const logger =  {
         break
       case 'WALLET':
         console.log(colors.wallet(`[${from}] ${message}`))
+        break
+      case 'ORDER SERVICE':
+        console.log(chalk.hex('#000').bgGreen(`[${from}]`) + colors.orderService(` ${message}`))
         break
     }
   }

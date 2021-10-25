@@ -28,12 +28,13 @@ class BinanceClient {
   client: Binance
   private axios: AxiosInstance
 
-  constructor({ apiKey, apiSecret, useServerTime }: { apiKey: string, apiSecret: string, useServerTime: boolean }) {
+  constructor({ apiKey, apiSecret, useServerTime, test=false }: { apiKey: string, apiSecret: string, useServerTime: boolean, test?: boolean }) {
     const client = new Binance().options({
       APIKEY: apiKey,
       APISECRET: apiSecret,
       recvWindow: 10000,
-      useServerTime
+      useServerTime,
+      test
     })
 
     this.axios = axios.create()
@@ -93,33 +94,35 @@ class BinanceClient {
     logger.log('BINANCE CLIENT', `Creating a buy order`)
     
     return new Promise((resolve, reject) => {
-      this.client.buy(coin, quantity, price, {type:'LIMIT'}, (error, response: Order) => {
+      this.client.buy(coin, quantity, price, {type:'LIMIT'}, (error, response: PairOrderResponseDTO) => {
         if(error) {
           reject(error)
           return
         };
-        logger.log('BINANCE CLIENT', `Buy order finish`)
-        logger.log('BINANCE CLIENT', `Buy order: ${response.id}`)
+        const parsedOrder = OrderParser.parsePairOrder(response)
 
-        resolve(response)
+        logger.log('BINANCE CLIENT', `Buy order finish`)
+        logger.log('BINANCE CLIENT', `Buy order: ${parsedOrder.id}`)
+
+        resolve(parsedOrder)
         return
       })
-
     })  
   }
 
   async createSellOrder(coin: Pairs, quantity: number, price: number): Promise<Order> {
     logger.log('BINANCE CLIENT', `Creating a sell order`)
     return new Promise((resolve, reject) => {
-      this.client.sell(coin, quantity, price, {type:'LIMIT'}, (error, response: Order) => {
+      this.client.sell(coin, quantity, price, {type:'LIMIT'}, (error, response: PairOrderResponseDTO) => {
         if(error) {
           reject(error)
           return
         };
+        const parsedOrder = OrderParser.parsePairOrder(response)
         logger.log('BINANCE CLIENT', `Sell order finish`)
-        logger.log('BINANCE CLIENT', `Sell order: ${response.id}`)
+        logger.log('BINANCE CLIENT', `Sell order: ${parsedOrder.id}`)
 
-        resolve(response)
+        resolve(parsedOrder)
         return
       })
     })  
@@ -136,12 +139,15 @@ class BinanceClient {
     logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
   }
 
-  async lastOrder(pair: Pairs): Promise<Order> {
+  async lastOrder(pair: Pairs): Promise<Order | null> {
     return new Promise<Order>((resolve, reject) => {
       this.client.allOrders(pair, (error, orders: PairOrderResponseDTO[], symbol) => {
         if(error){
           reject(error)
           return
+        }
+        if(orders.length === 0) {
+          return null
         }
         const parsedOrder = OrderParser.parsePairOrder(orders[0])
         resolve(parsedOrder)
@@ -151,7 +157,6 @@ class BinanceClient {
 
   async PairInfo(pair: Pairs): Promise<PairInfo> {
     const response = await this.axios.get<PairsResponseDTO>(`https://api.binance.com/api/v3/exchangeInfo?symbol=${pair}`)
-
     return SymbolParser.parse(response.data)[0]
   }
 
@@ -161,16 +166,14 @@ class BinanceClient {
       switch(update.e){
         case 'outboundAccountPosition':
           const parsedBalance = BalanceParser.parse(update)
-          console.log(parsedBalance)
           balanceCallback(parsedBalance)
           break
         case 'executionReport':
           const parsedOrder = OrderParser.parse(update)
-          console.log(parsedOrder)
           orderCallback(parsedOrder)
           break
       }
-    })
+    }, () => {})
   }
 
   async createWsCandleStickUpdate({ pair, updateCallback }: {pair: Pairs, updateCallback: (candlestick: Candlestick) => void}) {

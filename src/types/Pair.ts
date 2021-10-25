@@ -1,4 +1,4 @@
-export type Pairs = 'BTCUSDT' | 'BNBBTC' | 'BTCBNB' | 'ADABUSD' | 'SHIBBUSD' | 'BTCBUSD' | 'BNBBUSD'
+export type Pairs = 'BTCUSDT' | 'BNBBTC' | 'BTCBNB' | 'ADABUSD' | 'SHIBBUSD' | 'SHIBUSDT' | 'BTCBUSD' | 'BNBBUSD' | 'ETHBUSD'
 
 export interface PairInfo {
   pair: Pairs,

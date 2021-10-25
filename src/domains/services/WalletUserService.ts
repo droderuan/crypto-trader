@@ -7,6 +7,7 @@ import AppError from "../../utils/AppError";
 
 interface WalletConfig {
   pair: PairInfo,
+  orderUpdateCallback?: (order: Order) => void
 }
 
 export interface Balance {
@@ -27,9 +28,11 @@ class UserWalletService {
   private balanceToSell: CurrentBalance  = {} as CurrentBalance
   private PairInfo: PairInfo = {} as PairInfo
   private lastOrder = {} as Order
+  private orderUpdateCallback: ((order: Order) => void) | undefined
 
   constructor(config: WalletConfig ) {
     this.PairInfo = config.pair
+    this.orderUpdateCallback = config.orderUpdateCallback
   }
 
   async getInitialBalance() {
@@ -60,14 +63,6 @@ class UserWalletService {
       throw new AppError('WALLET', `No balance found for ${this.PairInfo.sellCoin}`)
     }
 
-    // if(balances[this.PairInfo.buyCoin].available === 0) {
-    //   throw new AppError('WALLET', `Balance for ${this.PairInfo.buyCoin} is 0.00`)
-    // }
-
-    // if(balances[this.PairInfo.sellCoin].available === 0) {
-    //   throw new AppError('WALLET', `Balance for ${this.PairInfo.sellCoin} is 0.00`)
-    // }
-
     this.balanceToBuy = {
       ...balances[this.PairInfo.buyCoin],
       coin: this.PairInfo.buyCoin
@@ -83,6 +78,7 @@ class UserWalletService {
   private orderUpdate(order: Order) {
     this.lastOrder = order
     this.orderUpdateLog()
+    this.orderUpdateCallback && this.orderUpdateCallback(order)
   }
 
   getBalance() {

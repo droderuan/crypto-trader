@@ -47,14 +47,15 @@ export class SimpleSMA extends GenericStrategy {
     this.log()
   }
 
-  verifyOpportunity(candle: Candlestick) {
+  verifyOpportunity() {
     logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
     const smaValues = this.sma.smaValues
     const candleReference = this.sma.getCandleReference()
     const lastSmaValue = smaValues[smaValues.length-1]
-    if (candle[candleReference] > lastSmaValue) {
+    const lastCandle = this.sma.lastCandle()
+    if (lastCandle[candleReference] > lastSmaValue) {
       return 'TO_BUY'
-    } else if (candle[candleReference] < lastSmaValue) {
+    } else if (lastCandle[candleReference] < lastSmaValue) {
       return 'TO_SELL'
     }
     return 'NOTHING'

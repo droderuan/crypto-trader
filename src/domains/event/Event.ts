@@ -1,27 +1,28 @@
+import { PairInfo, Pairs } from "../../types/Pair";
 import logger from "../../utils/logger";
 import { Strategies } from "../strategies/types";
 
 export type OrderEmitterTypes = 'BUY' | 'SELL' | 'REVERT'
 
-interface BuyOrderEvent {
+export interface BuyOrderEvent {
   type: 'BUY',
   params: {
-    pair: pair
+    pair: PairInfo
     quantity: number
     strategy: Strategies
   }
 }
 
-interface SellOrderEvent {
+export interface SellOrderEvent {
   type: 'SELL',
   params: {
-    pair: pair
+    pair: PairInfo
     quantity: number
     strategy: Strategies
   }
 }
 
-interface RevertEvent {
+export interface RevertEvent {
   type: 'REVERT',
   params: {
     reason: string
@@ -32,25 +33,24 @@ interface RevertEvent {
 type Event = BuyOrderEvent | SellOrderEvent | RevertEvent
 
 type Listeners = {
-  'BUY': Function[]
-  'SELL': Function[]
-  'REVERT': Function[]
-
+  'BUY': ((event: BuyOrderEvent) => void)[]
+  'SELL': ((event: SellOrderEvent) => void)[]
+  'REVERT': ((event: RevertEvent) => void)[]
 }
 
 export interface setBuyListener {
   event: 'BUY'
-  execute: () => void
+  execute: (event: BuyOrderEvent) => void
 }
 
 export interface setSellListener {
   event: 'SELL'
-  execute: () => void
+  execute: (event: SellOrderEvent) => void
 }
 
 export interface setRevertListener {
   event: 'REVERT'
-  execute: () => void
+  execute: (event: RevertEvent) => void
 }
 
 class OrderEventEmitter {
@@ -70,7 +70,7 @@ class OrderEventEmitter {
 
   emitter(event: OrderEmitterTypes){
     logger.log('EVENT', `${event}`)
-    this.listeners[event].forEach(action => action())
+    this.listeners[event].forEach(action => action(event))
   }
 }
 
