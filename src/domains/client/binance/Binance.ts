@@ -147,7 +147,6 @@ class BinanceClient {
         resolve(parsedOrder)
       }, {limit:1});
     })
-
   }
 
   async PairInfo(pair: Pairs): Promise<PairInfo> {
@@ -157,6 +156,7 @@ class BinanceClient {
   }
 
   async createWsBalanceAndOrderUpdate({ balanceCallback, orderCallback }: { balanceCallback: (balance: Balance) => void, orderCallback: (order: Order) => void }) {
+    logger.log('BINANCE CLIENT', 'Starting websocket to update account balance')
     this.client.websockets.userData((update: updateBalanceWsDTO) => {
       switch(update.e){
         case 'outboundAccountPosition':
@@ -174,6 +174,7 @@ class BinanceClient {
   }
 
   async createWsCandleStickUpdate({ pair, updateCallback }: {pair: Pairs, updateCallback: (candlestick: Candlestick) => void}) {
+    logger.log('BINANCE CLIENT', 'Starting websocket to update pair candlestick')
     this.client.websockets.candlesticks(pair, '1m', (candlestickData: CandleWsResponseDTO) => {
       const candlestick = CandlestickParser.parse(candlestickData);
       updateCallback(candlestick)

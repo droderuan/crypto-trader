@@ -1,8 +1,8 @@
-import { Candlestick, CandleStickReference, Window } from "../../types/Candle";
-import logger from "../../utils/logger";
-import SMA from "../indicators/arithmeticModels/sma";
-import { Position } from "../observer/Referee";
-import { GenericStrategy, StrategyDecision } from "./types";
+import { Candlestick, CandleStickReference, Window } from "../../../types/Candle";
+import logger from "../../../utils/logger";
+import SMA from "../../indicators/arithmeticModels/SMA";
+import { Position } from "../../observer/Referee";
+import { GenericStrategy, StrategyDecision } from "../types";
 
 export interface SimpleSmaConfig {
   window: Window
@@ -20,7 +20,7 @@ export class SimpleSMA extends GenericStrategy {
     logger.log('STRATEGIE', `Simple SMA - initialized`)
 
     this.sma = new SMA()
-    this.sma.config(initialValues, params)
+    this.sma.config({ initialValues, window: params.window })
     this.params = params
 
     logger.log('STRATEGIE', `Simple SMA - initialized`)

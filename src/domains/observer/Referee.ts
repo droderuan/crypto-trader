@@ -1,4 +1,4 @@
-import { StrategyDecision } from "../strategies/types"
+import { StrategyDecision } from "../strategies/types/GenericStrategy"
 import logger from "../../utils/logger"
 import Order from "../event/Event"
 

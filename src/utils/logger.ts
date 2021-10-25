@@ -1,44 +1,51 @@
 import chalk from 'chalk';
 
-type AppModules = 'APP'| 'BINANCE CLIENT' | 'MODELS' | 'EVENT' | 'WALLET' | 'ERROR' | 'REFEREE' | 'STRATEGIE' | 'STRATEGIE BUILDER' | 'CRYPTO APP'
+type AppModules = 'APP'| 'BINANCE CLIENT' | 'INDICATOR' | 'EVENT' | 'WALLET' | 'ERROR' | 'REFEREE' | 'STRATEGIE' | 'STRATEGIE BUILDER' | 'CRYPTO APP'
 
-const orange = chalk.hex('#e39400')
-const blue = chalk.hex('#008cff')
-const purple = chalk.hex('#b85cff')
-const blueEsmerald = chalk.hex('#b0fcff')
+const colors = {
+  app: chalk.bold.hex('#fafafa'),
+  error: chalk.bold.hex('#b71c1c'),
+  event: chalk.bold.hex('ffff00'),
+  binance: chalk.hex('#ff9800'),
+  cryptoApp: chalk.hex('#cddc39'),
+  strategie: chalk.hex('#b85cff'),
+  wallet: chalk.hex('#b0fcff'),
+  referee: chalk.hex('#3949ab'),
+  indicator: chalk.hex('#039be5')
+}
 
 const logger =  {
   log: (from: AppModules, message: string) => {
     switch(from){
       case 'APP':
-        console.log(chalk.blueBright(`[${from}] ${message}`))
+        console.log(colors.app(`[${from}] ${message}`))
         break
       case 'BINANCE CLIENT':
-        console.log(orange(`[${from}] ${message}`))
+        console.log(colors.binance(`[${from}] ${message}`))
         break
       case 'CRYPTO APP':
-        console.log(blueEsmerald(`[${from}] ${message}`))
+        console.log(colors.cryptoApp(`[${from}] ${message}`))
         break
       case 'ERROR':
-        console.log(chalk.bold.red(`[${from}] ${message}`))
+        console.log(colors.error(`[${from}] ${message}`))
         break
       case 'EVENT':
-        console.log(chalk.yellow(`[${from}] ${message}`))
+        console.log(colors.event(`[${from}] ${message}`))
         break
-      case 'MODELS':
-        console.log(blue(`[${from}] ${message}`))
+      case 'INDICATOR':
+        console.log(colors.indicator(`[${from}] ${message}`))
         break
       case 'REFEREE':
-        console.log(chalk.cyanBright(`[${from}] ${message}`))
+        console.log(colors.referee(`[${from}] ${message}`))
         break
       case 'STRATEGIE':
-        console.log(purple(`[${from}] ${message}`))
+        console.log(colors.strategie(`[${from}] ${message}`))
         break
       case 'STRATEGIE BUILDER':
-        console.log(purple(`[${from}] ${message}`))
+        console.log(colors.strategie(`[${from}] ${message}`))
         break
       case 'WALLET':
-        console.log(chalk.cyan(`[${from}] ${message}`))
+        console.log(colors.wallet(`[${from}] ${message}`))
         break
     }
   }
