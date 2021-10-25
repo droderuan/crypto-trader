@@ -1,52 +1,23 @@
-import { Coins } from "./Candle";
+import { OrderExecutionType, OrderSide, OrderStatus, OrderType } from "../domains/client/dtos/BalanceWebSocketDTO";
+import { Symbols } from "./Symbol";
 
-export type OrderEmitterTypes = 'BUY' | 'SELL' | 'REVERT'
-
-export interface OrderBuyParams{
-  type: 'BUY'
-  params: {
-    value: number
-    pair: number
-  }
-}
-
-export interface OrderSellParams {
-  type: 'SELL'
-  params: {
-    value: number
-    pair: number
-  }
-}
-
-export interface OrderRevertParams {
-  type: 'REVERT'
-}
-
-export interface setBuyListener {
-  event: 'BUY'
-  execute: (params: OrderBuyParams) => void
-}
-
-export interface setSellListener {
-  event: 'SELL'
-  execute: (params: OrderSellParams) => void
-}
-
-export interface setRevertListener {
-  event: 'REVERT'
-  execute: (params: OrderRevertParams) => void
+export interface OrderParams {
+  symbol: Symbols
+  quantity: number
+  price: number
 }
 
 export interface Order {
-  symbol: Coins,
-  orderId: number,
+  symbol: string,
+  id: number,
   clientOrderId: string,
-  transactTime: number,
-  price: string,
-  origQty: string,
-  executedQty: string,
-  status: 'NEW' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELED' | 'REJECTED',
-  timeInForce: 'GTC',
-  type: 'LIMIT',
-  side: 'BUY' | 'SELL'
+  eventTime: number,
+  creationTime: number,
+  price: number,
+  quantity: number,
+  currentExecutionType: OrderExecutionType
+  type: OrderType,
+  status: OrderStatus
+  lastExecutedQuantity: number
+  side: OrderSide
 }

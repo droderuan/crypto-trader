@@ -1,23 +1,16 @@
-import { Candle, Window } from "../../types/Candle"
-import logger from "../../utils/logger"
-import GenericModel from "../genericModel"
+import { Candlestick, CandleStickReference, Window } from "../../../types/Candle"
+import logger from "../../../utils/logger"
+import { SimpleSmaConfig } from "../../strategies/SimpleSMA"
+import { StrategieDecision } from "../../strategies/types"
 
-export interface SmaConfig {
-  window: Window
-  reference: {
-    toBuy: keyof Candle | 'current',
-    toSell: keyof Candle | 'current'
-  }
-}
-
-class SMA extends GenericModel {
-  private candles: Candle[] = []
+class SMA {
+  private candles: Candlestick[] = []
   private window: number = 0
   private step: number = 0
-  private candleReferenceValue: keyof Candle | 'current'  = 'close'
+  private candleReferenceValue: CandleStickReference = 'closePrice'
   smaValues: number[] = []
 
-  config(initialValues: Candle[], params: SmaConfig) {
+  config(initialValues: Candlestick[], params: SimpleSmaConfig) {
     logger.log('MODELS', `SMA - initializing`)
 
     this.candles = initialValues
@@ -48,24 +41,16 @@ class SMA extends GenericModel {
     })
   }
 
-  updateCandleReferenceValue (referenceValue: keyof Candle | 'current') {
+  getCandleReference() {
+    return this.candleReferenceValue
+  }
+
+  updateCandleReferenceValue (referenceValue: CandleStickReference) {
     this.candleReferenceValue = referenceValue
     this.initialCalculate()
   }
 
-  verifyOpportunity(candle: Candle): 'TO_BUY' | 'TO_SELL' | 'NOTHING' {
-    logger.log('MODELS', `SMA - checking if candle is above or below`)
-    this.log()
-    const lastSmaValue = this.smaValues[this.smaValues.length-1]
-    if (candle[this.candleReferenceValue] > lastSmaValue) {
-      return 'TO_BUY'
-    } else if (candle[this.candleReferenceValue] < lastSmaValue) {
-      return 'TO_SELL'
-    }
-    return 'NOTHING'
-  }
-
-  update(newCandle: Candle, log=true) {
+  update(newCandle: Candlestick, log=true) {
     logger.log('MODELS', `SMA - updating model..`)
 
     let lastIndex = this.candles.length - 1
@@ -89,6 +74,10 @@ class SMA extends GenericModel {
 
   lastSma() {
     return this.smaValues[this.smaValues.length -1]
+  }
+
+  lastCandle() {
+    return this.candles[this.candles.length -1]
   }
 
   currentSMA() {

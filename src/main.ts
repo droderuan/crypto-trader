@@ -2,39 +2,43 @@ import logger from './utils/logger'
 import env from './utils/env'
 import App from './domains/app/App'
 import BotConfig from './domains/app/BotConfig'
+import BinanceClient from './domains/client/binance/Binance'
 
 logger.log('APP', 'Starting...')
 
 export const botConfig = new BotConfig({
-  buyWith: 'USDT', 
-  sellWith: 'BTC',
-  symbol: 'BTCUSDT',
+  symbol: 'ADABUSD',
   startPosition: 'BOUGHT',
   candleSize: '5m',
-  model: {
-    modelName: 'SMA Crossover',
-    modelConfig: {
-      reference: 'current',
+  strategie: {
+    name: 'SMA Crossover',
+    config: {
       faster: {
-        window: 9
+        window: 9,
+        reference: {
+          toBuy: 'lowPrice',
+          toSell: 'highPrice'
+        }
       },
       slower: {
-        window: 21
+        window: 21,
+        reference: {
+          toBuy: 'lowPrice',
+          toSell: 'highPrice'
+        }
       }
     }
   },
   candleInterval: 300,
   updateInterval: 300,
-  coinPrecision: 5,
-  coinStep: 0.00001,
-  binanceApiKey: env.binanceApiKey,
-  binanceApiSecret: env.binanceApiSecret
+})
+
+export const binanceClient = new BinanceClient({
+  apiKey: env.binanceApiKey,
+  apiSecret: env.binanceApiSecret,
+  useServerTime: true
 })
 
 const app = new App(botConfig)
 
-app.start(async () => {
-  logger.log('APP', 'Started app')
-  await app.startObserve()
-  app.startIntervalCheck()
-})
+app.start()

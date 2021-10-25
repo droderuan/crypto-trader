@@ -1,10 +1,56 @@
-import { OrderBuyParams, OrderEmitterTypes, OrderRevertParams, OrderSellParams, setBuyListener, setRevertListener, setSellListener } from "../../types/Order";
 import logger from "../../utils/logger";
+import { Strategies } from "../strategies/types";
+
+export type OrderEmitterTypes = 'BUY' | 'SELL' | 'REVERT'
+
+interface BuyOrderEvent {
+  type: 'BUY',
+  params: {
+    symbol: symbol
+    quantity: number
+    strategie: Strategies
+  }
+}
+
+interface SellOrderEvent {
+  type: 'SELL',
+  params: {
+    symbol: symbol
+    quantity: number
+    strategie: Strategies
+  }
+}
+
+interface RevertEvent {
+  type: 'REVERT',
+  params: {
+    reason: string
+    strategie: Strategies
+  }
+}
+
+type Event = BuyOrderEvent | SellOrderEvent | RevertEvent
 
 type Listeners = {
-  'BUY': ((input: OrderBuyParams) => void)[]
-  'SELL': ((input: OrderSellParams) => void)[]
-  'REVERT': ((input: OrderRevertParams) => void)[]
+  'BUY': Function[]
+  'SELL': Function[]
+  'REVERT': Function[]
+
+}
+
+export interface setBuyListener {
+  event: 'BUY'
+  execute: () => void
+}
+
+export interface setSellListener {
+  event: 'SELL'
+  execute: () => void
+}
+
+export interface setRevertListener {
+  event: 'REVERT'
+  execute: () => void
 }
 
 class OrderEventEmitter {
@@ -22,9 +68,9 @@ class OrderEventEmitter {
     this.listeners[params.event].push(params.execute as any)
   }
 
-  emitter(input: 'BUY' | 'SELL' | 'REVERT'){
-    logger.log('EVENT', `${input}`)
-    this.listeners[input].forEach(action => action(input as any))
+  emitter(event: OrderEmitterTypes){
+    logger.log('EVENT', `${event}`)
+    this.listeners[event].forEach(action => action())
   }
 }
 

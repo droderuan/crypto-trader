@@ -1,4 +1,4 @@
-interface CandleResponseDTO {
+export default interface CandleResponseDTO {
   e: string,     // Event type
   E: number,     // Event time
   s: string,     // Symbol

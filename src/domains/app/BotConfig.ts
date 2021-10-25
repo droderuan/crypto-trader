@@ -1,35 +1,30 @@
-import models from "../models";
-import { SmaConfig } from "../models/arithmeticModels/sma";
-import { SmaCrossOverConfig } from "../models/arithmeticModels/smaCrossover";
-import { Candle, CandleSize, Coins } from "../../types/Candle";
-import { Position } from "./Referee";
+import { SimpleSmaConfig } from "../strategies/SimpleSMA";
+import { SmaCrossOverConfig } from "../strategies/SMACrossover";
+import { CandleInterval } from "../../types/Candle";
+import { Symbols } from "../../types/Symbol";
 
-interface SMA {
-  modelName: 'SMA',
-  modelConfig: SmaConfig
+import { Position } from "../observer/Referee";
+import { Strategies } from "../strategies/types";
+
+interface SimpleSMA {
+  name: "Simple SMA",
+  config: SimpleSmaConfig
 }
 
 interface SMACrossover {
-  modelName: 'SMA Crossover',
-  modelConfig: SmaCrossOverConfig
+  name: "SMA Crossover",
+  config: SmaCrossOverConfig
 }
 
-type modelConfig = SMA | SMACrossover
+export type StrategieConfig = SimpleSMA | SMACrossover
 
 interface BotConfigParams {
-  buyWith: string
-  sellWith: string
-  symbol: Coins
-  binanceApiKey: string
-  binanceApiSecret: string
-  model: modelConfig
-  candleSize: CandleSize
+  symbol: Symbols
+  strategie: StrategieConfig
+  candleSize: CandleInterval
   updateInterval: number
   candleInterval: number
   startPosition: Position
-  coinPrecision: number
-  coinStep: number
-  
 }
 
 class BotConfig {
