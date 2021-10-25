@@ -1,14 +1,14 @@
 import { binanceClient } from "../../main";
-import { SymbolInfo } from "../../types/Symbol";
+import { PairInfo } from "../../types/Pair";
 
 interface CreateOrder{
-  symbolInfo: SymbolInfo,
+  PairInfo: PairInfo,
   quantity: number
 }
 
 class OrderService {
-  async create({symbolInfo}: CreateOrder){
-    const pair = symbolInfo.symbol
+  async create({PairInfo}: CreateOrder){
+    const pair = PairInfo.symbol
     const currentValue = await binanceClient.currentPrice(pair)
     const quantityWithoufix = Number(this.balance[this.buyWith].available) / this.currentValue
     const quantity = this.fixeNumber(quantityWithoufix)

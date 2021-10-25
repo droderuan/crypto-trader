@@ -1,13 +1,13 @@
 // import BinanceClient from "../client/binance/Binance";
 // import logger from "../../utils/logger";
-// import { SymbolInfo, Symbols } from "../../types/Symbol";
+// import { PairInfo, Pairs } from "../../types/Pair";
 // import { Order } from "../../types/Order";
 // import OrderEventEmitter from "../event/Event";
 // import { binanceClient } from '../../main';
 
 // interface WalletConfig {
 //   binanceClient: BinanceClient,
-//   symbol: SymbolInfo,
+//   symbol: PairInfo,
 //   orderEvent: OrderEventEmitter
 // }
 
@@ -27,23 +27,23 @@
 // class UserWalletService {
 //   private balanceToBuy: CurrentBalance  = {} as CurrentBalance
 //   private balanceToSell: CurrentBalance  = {} as CurrentBalance
-//   private symbolInfo: SymbolInfo = {} as SymbolInfo
+//   private PairInfo: PairInfo = {} as PairInfo
 //   private lastOrder = {} as Order
 //   private orderStatusCheckCount = 1
 //   orderEvent: OrderEventEmitter
 
 //   constructor(config: WalletConfig ) {
-//     this.symbolInfo = config.symbol
+//     this.PairInfo = config.symbol
 //     this.orderEvent = config.orderEvent
 //   }
 
 //   fixeNumber(number: number | string): number {
 //     const splitted = String(number).split('.')
-//     const fixed = splitted[1].slice(0, this.symbolInfo.precisionRound)
+//     const fixed = splitted[1].slice(0, this.PairInfo.precisionRound)
 //     return Number(splitted[0]+'.'+fixed)
 //   }
 
-//   async startBalanceAndOrderUpdate(symbol: SymbolInfo) {
+//   async startBalanceAndOrderUpdate(symbol: PairInfo) {
 //     binanceClient.createWsBalanceAndOrderUpdate({
 //       balanceCallback: (balance) => this.balanceUpdate(balance),
 //       orderCallback: (order) => this.orderUpdate(order)
@@ -52,12 +52,12 @@
 
 //   balanceUpdate(balances: Balance){
 //     this.balanceToBuy = {
-//       ...balances[this.symbolInfo.buyCoin],
-//       coin: this.symbolInfo.buyCoin
+//       ...balances[this.PairInfo.buyCoin],
+//       coin: this.PairInfo.buyCoin
 //     }
 //     this.balanceToSell = {
-//       ...balances[this.symbolInfo.sellCoin],
-//       coin: this.symbolInfo.sellCoin
+//       ...balances[this.PairInfo.sellCoin],
+//       coin: this.PairInfo.sellCoin
 //     }
 //   }
 
@@ -91,7 +91,7 @@
 //   async sell(cb?: Function) {
 //     try {
 //       await this.updateBalance()
-//       const coin = this.sellWith+this.buyWith as Symbols
+//       const coin = this.sellWith+this.buyWith as Pairs
 //       const quantity = this.fixeNumber(Number(this.balance[this.sellWith].available))
 //       logger.log('WALLET', `${quantity} of ${this.sellWith}`)
 //       if(quantity >= this.minimumValue){

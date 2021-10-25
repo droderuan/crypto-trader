@@ -1,4 +1,4 @@
-import { Symbols } from "../../../types/Symbol";
+import { Pairs } from "../../../types/Pair";
 
 interface PRICE_FILTER {
   filterType: "PRICE_FILTER",
@@ -54,9 +54,9 @@ export type Filters = PRICE_FILTER | PERCENT_PRICE | LOT_SIZE | MIN_NOTIONAL | I
 export type OrderTypes = "LIMIT" | "LIMIT_MAKER" | "MARKET" | "STOP_LOSS_LIMIT" | "TAKE_PROFIT_LIMIT"
 export type Permissions = "SPOT" | "MARGIN"
 
-export interface SymbolsResponseDTO {
-  symbols: {
-    symbol: Symbols,
+export interface PairsResponseDTO {
+  Pairs: {
+    symbol: Pairs,
     status: string,
     baseAsset: string,
     baseAssetPrecision: number,

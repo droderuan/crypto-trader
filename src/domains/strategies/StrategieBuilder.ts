@@ -1,19 +1,19 @@
 import strategies from ".";
 import { binanceClient } from "../../main";
 import { CandleInterval, Window } from "../../types/Candle";
-import { Symbols } from "../../types/Symbol";
+import { Pairs } from "../../types/Pair";
 import AppError from "../../utils/AppError";
 import logger from "../../utils/logger";
 import { StrategieConfig } from "../app/BotConfig";
 
 interface StrategieBuilderParams {
   strategieConfig: StrategieConfig,
-  pair: Symbols
+  pair: Pairs
   candleSize: CandleInterval
 }
 
 export class StrategieBuilder {
-  private pair!: Symbols
+  private pair!: Pairs
   private candleSize!: CandleInterval
 
   async build({ strategieConfig, pair, candleSize  }: StrategieBuilderParams){

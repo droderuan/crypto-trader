@@ -1,7 +1,7 @@
 import { SimpleSmaConfig } from "../strategies/SimpleSMA";
 import { SmaCrossOverConfig } from "../strategies/SMACrossover";
 import { CandleInterval } from "../../types/Candle";
-import { Symbols } from "../../types/Symbol";
+import { Pairs } from "../../types/Pair";
 
 import { Position } from "../observer/Referee";
 import { Strategies } from "../strategies/types";
@@ -19,7 +19,7 @@ interface SMACrossover {
 export type StrategieConfig = SimpleSMA | SMACrossover
 
 interface BotConfigParams {
-  symbol: Symbols
+  symbol: Pairs
   strategie: StrategieConfig
   candleSize: CandleInterval
   updateInterval: number

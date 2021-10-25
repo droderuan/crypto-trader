@@ -4,8 +4,8 @@ import { BalanceUpdateDTO } from "../../dtos/BalanceWebSocketDTO"
 
 export class BalanceParser {
   static parse(lastBalance: BalanceUpdateDTO ): Balance {
-    return lastBalance.B.reduce((symbols, value) => ({
-      ...symbols,
+    return lastBalance.B.reduce((Pairs, value) => ({
+      ...Pairs,
       [value.a]: {
         available: parseFloat(value.f),
         onOrder: parseFloat(value.l),

@@ -1,5 +1,5 @@
 import { binanceClient } from "../../main";
-import { SymbolInfo, Symbols } from "../../types/Symbol";
+import { PairInfo, Pairs } from "../../types/Pair";
 import AppError from "../../utils/AppError";
 import BotConfig from "../app/BotConfig";
 import { GenericStrategie } from "../strategies/types";
@@ -8,17 +8,17 @@ import UserWalletService from "./WalletUserService";
 class CryptoAppService {
   private config!: BotConfig 
   private strategie!: GenericStrategie 
-  private symbol!: SymbolInfo
+  private symbol!: PairInfo
   private wallet!: UserWalletService
 
   setConfig(config: BotConfig) {
     this.config = config
   }
 
-  async setSymbol(symbol: Symbols) {
+  async setSymbol(symbol: Pairs) {
     try {
-      const symbolInfo = await binanceClient.symbolInfo(symbol)
-      this.symbol = symbolInfo
+      const PairInfo = await binanceClient.PairInfo(symbol)
+      this.symbol = PairInfo
     } catch (err) {
       throw new AppError('CRYPTO_SERVICE', 'Error on get symbol info')
     }

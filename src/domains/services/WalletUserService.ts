@@ -1,12 +1,12 @@
 import BinanceClient from "../client/binance/Binance";
 import logger from "../../utils/logger";
-import { SymbolInfo, Symbols } from "../../types/Symbol";
+import { PairInfo, Pairs } from "../../types/Pair";
 import { Order } from "../../types/Order";
 import { binanceClient } from '../../main';
 import AppError from "../../utils/AppError";
 
 interface WalletConfig {
-  symbol: SymbolInfo,
+  symbol: PairInfo,
 }
 
 export interface Balance {
@@ -25,16 +25,16 @@ interface CurrentBalance {
 class UserWalletService {
   private balanceToBuy: CurrentBalance  = {} as CurrentBalance
   private balanceToSell: CurrentBalance  = {} as CurrentBalance
-  private symbolInfo: SymbolInfo = {} as SymbolInfo
+  private PairInfo: PairInfo = {} as PairInfo
   private lastOrder = {} as Order
 
   constructor(config: WalletConfig ) {
-    this.symbolInfo = config.symbol
+    this.PairInfo = config.symbol
   }
 
   async getInitialBalance() {
     try {
-      const balanceResponse =  await binanceClient.currentBalance([this.symbolInfo.buyCoin, this.symbolInfo.sellCoin]);
+      const balanceResponse =  await binanceClient.currentBalance([this.PairInfo.buyCoin, this.PairInfo.sellCoin]);
       this.balanceUpdate(balanceResponse)
     } catch (err) {
       if(err instanceof AppError) {
@@ -52,29 +52,29 @@ class UserWalletService {
   }
 
   private balanceUpdate(balances: Balance){
-    if(!balances[this.symbolInfo.buyCoin]) {
-      throw new AppError('WALLET', `No balance found for ${this.symbolInfo.buyCoin}`)
+    if(!balances[this.PairInfo.buyCoin]) {
+      throw new AppError('WALLET', `No balance found for ${this.PairInfo.buyCoin}`)
     }
 
-    if(!balances[this.symbolInfo.sellCoin]) {
-      throw new AppError('WALLET', `No balance found for ${this.symbolInfo.sellCoin}`)
+    if(!balances[this.PairInfo.sellCoin]) {
+      throw new AppError('WALLET', `No balance found for ${this.PairInfo.sellCoin}`)
     }
 
-    // if(balances[this.symbolInfo.buyCoin].available === 0) {
-    //   throw new AppError('WALLET', `Balance for ${this.symbolInfo.buyCoin} is 0.00`)
+    // if(balances[this.PairInfo.buyCoin].available === 0) {
+    //   throw new AppError('WALLET', `Balance for ${this.PairInfo.buyCoin} is 0.00`)
     // }
 
-    // if(balances[this.symbolInfo.sellCoin].available === 0) {
-    //   throw new AppError('WALLET', `Balance for ${this.symbolInfo.sellCoin} is 0.00`)
+    // if(balances[this.PairInfo.sellCoin].available === 0) {
+    //   throw new AppError('WALLET', `Balance for ${this.PairInfo.sellCoin} is 0.00`)
     // }
 
     this.balanceToBuy = {
-      ...balances[this.symbolInfo.buyCoin],
-      coin: this.symbolInfo.buyCoin
+      ...balances[this.PairInfo.buyCoin],
+      coin: this.PairInfo.buyCoin
     }
     this.balanceToSell = {
-      ...balances[this.symbolInfo.sellCoin],
-      coin: this.symbolInfo.sellCoin
+      ...balances[this.PairInfo.sellCoin],
+      coin: this.PairInfo.sellCoin
     }
 
     this.balanceUpdateLog()

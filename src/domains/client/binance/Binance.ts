@@ -2,11 +2,11 @@ import axios, { AxiosInstance } from 'axios';
 import https from 'https'
 import Binance from "node-binance-api";
 import { CandleInterval, Candlestick, Window } from "../../../types/Candle";
-import { Symbols } from "../../../types/Symbol";
+import { Pairs } from "../../../types/Pair";
 import { Order } from "../../../types/Order";
-import { SymbolInfo } from '../../../types/Symbol';
+import { PairInfo } from '../../../types/Pair';
 import logger from "../../../utils/logger";
-import { SymbolsResponseDTO } from '../dtos/SymbolResponseDTO';
+import { PairsResponseDTO } from '../dtos/SymbolResponseDTO';
 
 import { CandlestickParser } from './parsers/CandleParser'
 import { SymbolParser } from './parsers/SymbolParser';
@@ -17,7 +17,7 @@ import { OrderParser } from './parsers/OrderParser';
 import { BalanceResponseDTO } from '../dtos/BalanceResponseDTO';
 
 interface historicalParams {
-  symbol: Symbols
+  symbol: Pairs
   interval: CandleInterval
   window?: Window
 }
@@ -72,7 +72,7 @@ class BinanceClient {
 
   }
 
-  async currentPrice(symbol: Symbols): Promise<number>{
+  async currentPrice(symbol: Pairs): Promise<number>{
     return new Promise((resolve, reject) => {
       logger.log('BINANCE CLIENT', `Getting current value of ${symbol}`)
       this.client.prices(symbol, (error: any, ticker: {[key: string]: string}) => {
@@ -104,7 +104,7 @@ class BinanceClient {
     })
   }
 
-  async createBuyOrder(coin: Symbols, quantity: number, price: number): Promise<Order> {
+  async createBuyOrder(coin: Pairs, quantity: number, price: number): Promise<Order> {
     logger.log('BINANCE CLIENT', `Creating a buy order`)
     
     return new Promise((resolve, reject) => {
@@ -123,7 +123,7 @@ class BinanceClient {
     })  
   }
 
-  async createSellOrder(coin: Symbols, quantity: number, price: number): Promise<Order> {
+  async createSellOrder(coin: Pairs, quantity: number, price: number): Promise<Order> {
     logger.log('BINANCE CLIENT', `Creating a sell order`)
     return new Promise((resolve, reject) => {
       this.client.sell(coin, quantity, price, {type:'LIMIT'}, (error, response: Order) => {
@@ -151,8 +151,8 @@ class BinanceClient {
     logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
   }
 
-  async symbolInfo(symbol: Symbols): Promise<SymbolInfo> {
-    const response = await this.axios.get<SymbolsResponseDTO>(`https://api.binance.com/api/v3/exchangeInfo?symbol=${symbol}`)
+  async PairInfo(symbol: Pairs): Promise<PairInfo> {
+    const response = await this.axios.get<PairsResponseDTO>(`https://api.binance.com/api/v3/exchangeInfo?symbol=${symbol}`)
 
     return SymbolParser.parse(response.data)[0]
   }

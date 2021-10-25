@@ -1,10 +1,10 @@
-import { SymbolInfo } from "../../../../types/Symbol"
+import { PairInfo } from "../../../../types/Pair"
 import AppError from "../../../../utils/AppError"
-import { SymbolsResponseDTO } from "../../dtos/SymbolResponseDTO"
+import { PairsResponseDTO } from "../../dtos/SymbolResponseDTO"
 
 export class SymbolParser {
-  static parse({ symbols }: SymbolsResponseDTO) {
-    return symbols.map(value => {
+  static parse({ Pairs }: PairsResponseDTO) {
+    return Pairs.map(value => {
       const lotSize = value.filters.find((filter) => filter.filterType === 'LOT_SIZE')
       if(!lotSize || lotSize.filterType !== 'LOT_SIZE') {
         throw new AppError('SYMBOL_PARSER', 'No LOT_SIZE fitler find')
@@ -23,7 +23,7 @@ export class SymbolParser {
         stepSize: parseFloat(lotSize.stepSize),
         status: value.status,
         precisionRound: precision
-      } as SymbolInfo
+      } as PairInfo
     })
   }
 }

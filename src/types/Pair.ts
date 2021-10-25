@@ -1,7 +1,7 @@
-export type Symbols = 'BTCUSDT' | 'BNBBTC' | 'BTCBNB' | 'ADABUSD' | 'SHIBBUSD' | 'BTCBUSD' | 'BNBBUSD'
+export type Pairs = 'BTCUSDT' | 'BNBBTC' | 'BTCBNB' | 'ADABUSD' | 'SHIBBUSD' | 'BTCBUSD' | 'BNBBUSD'
 
-export interface SymbolInfo {
-  symbol: Symbols,
+export interface PairInfo {
+  symbol: Pairs,
   status: string,
   buyCoin: string
   buyCoinPrecision: number

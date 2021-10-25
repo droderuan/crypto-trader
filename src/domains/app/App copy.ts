@@ -72,7 +72,7 @@
 //           throw Error('window cannot be 0')
 //         }
 
-//         const res = await this.binanceClient.symbolInfo('BTCUSDT')
+//         const res = await this.binanceClient.PairInfo('BTCUSDT')
 //         console.log(res)
 //         throw Error('finish')
 
