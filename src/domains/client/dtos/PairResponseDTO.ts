@@ -55,7 +55,7 @@ export type OrderTypes = "LIMIT" | "LIMIT_MAKER" | "MARKET" | "STOP_LOSS_LIMIT" 
 export type Permissions = "SPOT" | "MARGIN"
 
 export interface PairsResponseDTO {
-  Pairs: {
+  symbols: {
     symbol: Pairs,
     status: string,
     baseAsset: string,

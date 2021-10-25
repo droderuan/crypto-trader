@@ -1,21 +1,21 @@
 import { OrderExecutionType, OrderSide, OrderStatus, OrderType } from "../domains/client/dtos/BalanceWebSocketDTO";
-import { Pairs } from "./Symbol";
+import { Pairs } from "./Pair";
 
 export interface OrderParams {
-  symbol: Pairs
+  pair: Pairs
   quantity: number
   price: number
 }
 
 export interface Order {
-  symbol: string,
+  pair: string,
   id: number,
   clientOrderId: string,
   eventTime: number,
   creationTime: number,
   price: number,
   quantity: number,
-  currentExecutionType: OrderExecutionType
+  currentExecutionType?: OrderExecutionType
   type: OrderType,
   status: OrderStatus
   lastExecutedQuantity: number

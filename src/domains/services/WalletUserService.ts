@@ -6,7 +6,7 @@ import { binanceClient } from '../../main';
 import AppError from "../../utils/AppError";
 
 interface WalletConfig {
-  symbol: PairInfo,
+  pair: PairInfo,
 }
 
 export interface Balance {
@@ -29,7 +29,7 @@ class UserWalletService {
   private lastOrder = {} as Order
 
   constructor(config: WalletConfig ) {
-    this.PairInfo = config.symbol
+    this.PairInfo = config.pair
   }
 
   async getInitialBalance() {

@@ -1,7 +1,8 @@
 import { Candlestick, CandleStickReference, Window } from "../../types/Candle";
 import logger from "../../utils/logger";
 import SMA from "../indicators/arithmeticModels/sma";
-import { GenericStrategie, StrategieDecision } from "./types";
+import { Position } from "../observer/Referee";
+import { GenericStrategy, StrategyDecision } from "./types";
 
 export interface SimpleSmaConfig {
   window: Window
@@ -11,19 +12,21 @@ export interface SimpleSmaConfig {
   }
 }
 
-export class SimpleSMA extends GenericStrategie {
+export class SimpleSMA extends GenericStrategy {
   sma: SMA = null as any
+  params!: SimpleSmaConfig
 
   config(initialValues: Candlestick[], params: SimpleSmaConfig) {
     logger.log('STRATEGIE', `Simple SMA - initialized`)
 
     this.sma = new SMA()
     this.sma.config(initialValues, params)
+    this.params = params
 
     logger.log('STRATEGIE', `Simple SMA - initialized`)
   }
 
-  decision(): StrategieDecision {
+  decision(): StrategyDecision {
     logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
     this.log()
 
@@ -57,9 +60,12 @@ export class SimpleSMA extends GenericStrategie {
     return 'NOTHING'
   }
 
-  updateCandleReferenceValue (referenceValue: CandleStickReference) {
-    this.sma.updateCandleReferenceValue(referenceValue)
+  updateCandleReference(position: Position) {
+    const reference = position === 'BOUGHT' ? this.params.reference.toSell : this.params.reference.toBuy
+
+    this.sma.setReferenceValue(reference)
   }
+
 
   log() {
     logger.log('STRATEGIE', `SIMPLE SMA`)

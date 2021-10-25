@@ -1,4 +1,4 @@
-import { StrategieDecision } from "../strategies/types"
+import { StrategyDecision } from "../strategies/types"
 import logger from "../../utils/logger"
 import Order from "../event/Event"
 
@@ -13,12 +13,12 @@ class Referee {
     this.currentPosition = currentPosition
   }
 
-  updateDecision(decision: StrategieDecision) {
+  updateDecision(decision: StrategyDecision) {
     this.judge(decision)
     console.table([{ pricePosition: decision === 'TO_SELL' ? 'below' : 'above', position: this.currentPosition}])
   }
 
-  judge(decision: StrategieDecision) {
+  judge(decision: StrategyDecision) {
     logger.log('REFEREE', `Strategie said ${decision}`)
     switch(decision){
       case('TO_BUY'):

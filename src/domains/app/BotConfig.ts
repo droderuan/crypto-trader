@@ -19,12 +19,12 @@ interface SMACrossover {
 export type StrategieConfig = SimpleSMA | SMACrossover
 
 interface BotConfigParams {
-  symbol: Pairs
-  strategie: StrategieConfig
+  pair: Pairs
+  strategy: StrategieConfig
   candleSize: CandleInterval
   updateInterval: number
   candleInterval: number
-  startPosition: Position
+  startPosition?: Position
 }
 
 class BotConfig {

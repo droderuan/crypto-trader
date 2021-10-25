@@ -9,15 +9,15 @@
 
 // class App {
 //   botConfig: BotConfig
-//   private strategie
+//   private strategy
 //   private OrderEventEmitter
 //   private referee
 
 //   constructor(botConfig: BotConfig) {
 //     this.botConfig = botConfig
 //     const botParams = this.botConfig.config
-//     const SelectedStrategie = strategies[botParams.strategie.name]
-//     this.strategie = new SelectedStrategie()
+//     const SelectedStrategie = strategies[botParams.strategy.name]
+//     this.strategy = new SelectedStrategie()
 
 //     this.OrderEventEmitter = new OrderEventEmitter()
     
@@ -25,13 +25,13 @@
 //     let modelSellCallback: Function | undefined = undefined
 
     
-//     if (botParams.strategie.name === 'Simple SMA') {
+//     if (botParams.strategy.name === 'Simple SMA') {
 //       const position = botParams.startPosition
-//       const reference = botParams.strategie.config.reference
-//       this.strategie.updateCandleReferenceValue(position === 'BOUGHT' ? reference.toSell : reference.toBuy)
+//       const reference = botParams.strategy.config.reference
+//       this.strategy.updateCandleReferenceValue(position === 'BOUGHT' ? reference.toSell : reference.toBuy)
 
-//       modelBuyCallback = () => this.strategie.updateCandleReferenceValue(reference.toSell)
-//       modelSellCallback = () => this.strategie.updateCandleReferenceValue(reference.toBuy)
+//       modelBuyCallback = () => this.strategy.updateCandleReferenceValue(reference.toSell)
+//       modelSellCallback = () => this.strategy.updateCandleReferenceValue(reference.toBuy)
 //     }
 
 //     this.OrderEventEmitter.setListener({
@@ -57,15 +57,15 @@
 //   }
 
 //   async start(cb: Function) {
-//     const { strategie, symbol, candleSize } = this.botConfig.config
+//     const { strategy, pair, candleSize } = this.botConfig.config
 //       try {
 //         let window = 0
-//         logger.log('APP', `Using ${strategie.name}`)
-//         if(strategie.name === 'Simple SMA'){
-//           window = strategie.config.window
+//         logger.log('APP', `Using ${strategy.name}`)
+//         if(strategy.name === 'Simple SMA'){
+//           window = strategy.config.window
 //         }
-//         if(strategie.name === 'SMA Crossover') {
-//           window = strategie.config.slower?.window || 0
+//         if(strategy.name === 'SMA Crossover') {
+//           window = strategy.config.slower?.window || 0
 //         }  
         
 //         if(window === 0) {
@@ -77,7 +77,7 @@
 //         throw Error('finish')
 
 //         const candles = await this.binanceClient.getHistorical({ 
-//           symbol: symbol,
+//           pair: pair,
 //           interval: candleSize,
 //           window: window as Window })
 //         if (!candles) {
@@ -85,7 +85,7 @@
 //           throw Error('No initial candle')
 //         }
         
-//         this.strategie.config(candles, strategie.config as any)
+//         this.strategy.config(candles, strategy.config as any)
         
 //         cb()
 //       } catch (err) {
@@ -110,11 +110,11 @@
 //       this.binanceClient.wait(async () => {
 //           logger.log("APP", "Updating the model")
 //           try {
-//             const candle = await this.binanceClient.getLastCandle({ symbol: botParams.symbol, interval: botParams.candleSize })
+//             const candle = await this.binanceClient.getLastCandle({ pair: botParams.pair, interval: botParams.candleSize })
 //             if (!candle) {
 //               return
 //             }
-//             await this.strategie.update(candle)
+//             await this.strategy.update(candle)
 //             resolve()
 //           } catch (err) {
 //             logger.log('ERROR', 'on get last candle')
@@ -124,17 +124,17 @@
 //   }
 
 //   async lastValueCheck() {
-//     const { symbol, candleSize } = this.botConfig.config
+//     const { pair, candleSize } = this.botConfig.config
 //     logger.log("APP", "Verifying if there is a new candle value")
 //     try {
 //       const candle = await this.binanceClient.getLastCandle({
-//         symbol: symbol,
+//         pair: pair,
 //         interval: candleSize })
 
 //       if (!candle) {
 //         return
 //       }
-//       this.referee.updateDecision(this.strategie.verifyOpportunity(candle))
+//       this.referee.updateDecision(this.strategy.verifyOpportunity(candle))
 //     } catch (err) {
 //       logger.log('ERROR', 'on get last candle')
 //     }

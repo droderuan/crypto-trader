@@ -18,19 +18,20 @@ class App {
   }
 
   async start(cb?: Function) {
-    const { strategie: strategieConfig, symbol, candleSize } = this.botConfig.config
+    const { strategy: strategieConfig, pair, candleSize } = this.botConfig.config
     const cryptoApp = new CryptoAppService()
 
-    await cryptoApp.setSymbol(symbol)
-    
+    await cryptoApp.setPairInfo(pair)
+    cryptoApp.setConfig(this.botConfig)
+
     const strategieBuilder = new StrategieBuilder()
-    const strategie = await strategieBuilder.build({
+    const strategy = await strategieBuilder.build({
       strategieConfig, 
-      pair: symbol, 
+      pair: pair, 
       candleSize
     })
 
-    cryptoApp.setStrategie(strategie)
+    cryptoApp.setStrategie(strategy)
 
     cryptoApp.init()
   }

@@ -1,11 +1,11 @@
-export interface BalanceUpdateDTO {
-  e: 'outboundAccountPosition',            //Event type
-  E: 1635111139141,     //Event Time
-  u: 1635111139140,     //Time of last account update
+export interface BalanceWsUpdateDTO {
+  e: 'outboundAccountPosition',     //Event type
+  E: 1635111139141,                 //Event Time
+  u: 1635111139140,                 //Time of last account update
   B: {    
-    a: string,          //Asset
-    f: string,          //Free
-    l: string           //Locked
+    a: string,                      //Asset
+    f: string,                      //Free
+    l: string                       //Locked
   }[]
 }
 
@@ -14,7 +14,7 @@ export type OrderStatus = 'NEW' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELED' | '
 export type OrderType = 'LIMIT' | 'MARKET' | 'STOP_LOSS' | 'STOP_LOSS_LIMIT' | 'TAKE_PROFIT' | 'TAKE_PROFIT_LIMIT' | 'LIMIT_MAKER'
 export type OrderSide = "BUY" | "SELL"
 
-export interface OrderUpdateDTO {
+export interface OrderWsUpdateDTO {
   e: "executionReport",       // Event type
   E: number,                  // Event time
   s: string,                  // Symbol
@@ -49,4 +49,4 @@ export interface OrderUpdateDTO {
   Q: string                   // Quote Order Qty
 }
 
-export type updateBalanceDTO = BalanceUpdateDTO | OrderUpdateDTO
+export type updateBalanceWsDTO = BalanceWsUpdateDTO | OrderWsUpdateDTO

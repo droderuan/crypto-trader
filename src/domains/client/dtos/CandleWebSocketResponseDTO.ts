@@ -1,4 +1,4 @@
-export default interface CandleResponseDTO {
+export default interface CandleWsResponseDTO {
   e: string,     // Event type
   E: number,     // Event time
   s: string,     // Symbol
@@ -15,7 +15,7 @@ export default interface CandleResponseDTO {
     l: string,   // Low price
     v: string,   // Base asset volume
     n: number,   // Number of trades
-    x: boolean,    // Is this kline closed?
+    x: boolean,  // Is this kline closed?
     q: string,   // Quote asset volume
     V: string,   // Taker buy base asset volume
     Q: string,   // Taker buy quote asset volume

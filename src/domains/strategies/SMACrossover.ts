@@ -1,21 +1,29 @@
 import { CandleStickReference, Candlestick } from "../../types/Candle";
 import logger from "../../utils/logger";
-import { GenericStrategie, StrategieDecision } from "./types";
+import { GenericStrategy, StrategyDecision } from "./types";
 import SMA from "../indicators/arithmeticModels/sma";
 import { SimpleSmaConfig } from "./SimpleSMA";
+import { Position } from "../observer/Referee";
 
 export interface SmaCrossOverConfig {
   slower: SimpleSmaConfig
   faster: SimpleSmaConfig
 }
 
-export class SmaCrossover extends GenericStrategie {
+export class SmaCrossover extends GenericStrategy {
   private faster: SMA = null as any
   private slower: SMA = null as any
+  private params!: SmaCrossOverConfig
 
-  updateCandleReferenceValue (referenceValue: CandleStickReference) {
-    this.faster.updateCandleReferenceValue(referenceValue)
-    this.slower.updateCandleReferenceValue(referenceValue)
+  updateCandleReference(position: Position) {
+    const fasterModelConfig = this.params.faster.reference
+    const slowerModelConfig = this.params.faster.reference
+
+    const referenceFaster = position === 'BOUGHT' ? fasterModelConfig.toSell : fasterModelConfig.toBuy
+    const referenceSlower = position === 'BOUGHT' ? slowerModelConfig.toSell : slowerModelConfig.toBuy
+
+    this.faster.setReferenceValue(referenceFaster)
+    this.slower.setReferenceValue(referenceSlower)
   }
 
   config(initialValues: Candlestick[], params: SmaCrossOverConfig) {
@@ -24,6 +32,8 @@ export class SmaCrossover extends GenericStrategie {
     }
 
     logger.log('STRATEGIE', `SMA Crossover - initializing`)
+
+    this.params = params
 
     this.faster = new SMA()
     this.faster.config(initialValues, params.faster)
@@ -35,7 +45,7 @@ export class SmaCrossover extends GenericStrategie {
 
   }
 
-  decision(): StrategieDecision {
+  decision(): StrategyDecision {
     const currentFasterSmaValue = this.faster.lastSma()
     const currentSlowerSmaValue = this.slower.lastSma()
 

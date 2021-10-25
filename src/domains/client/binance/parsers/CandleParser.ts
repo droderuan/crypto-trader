@@ -2,9 +2,9 @@ import { CandleInterval, Candlestick } from "../../../../types/Candle"
 import CandleResponseDTO from "../../dtos/CandleWebSocketResponseDTO"
 
 export class CandlestickParser {
-  static parseHistorical(symbol: string, interval: CandleInterval, candlesticks: string[][]): Candlestick[] {
+  static parseHistorical(pair: string, interval: CandleInterval, candlesticks: string[][]): Candlestick[] {
     return candlesticks.map(value => ({
-      symbol: symbol,
+      pair: pair,
       startedAt: parseFloat(value[1]),
       closedAt: parseFloat(value[6]),
       interval: interval,
@@ -18,7 +18,7 @@ export class CandlestickParser {
   
   static parse(candlestickDTO: CandleResponseDTO): Candlestick {
     return {
-      symbol: candlestickDTO.s,
+      pair: candlestickDTO.s,
       startedAt: candlestickDTO.k.t,
       closedAt: candlestickDTO.k.T,
       interval: candlestickDTO.k.i,

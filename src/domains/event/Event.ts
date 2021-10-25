@@ -6,18 +6,18 @@ export type OrderEmitterTypes = 'BUY' | 'SELL' | 'REVERT'
 interface BuyOrderEvent {
   type: 'BUY',
   params: {
-    symbol: symbol
+    pair: pair
     quantity: number
-    strategie: Strategies
+    strategy: Strategies
   }
 }
 
 interface SellOrderEvent {
   type: 'SELL',
   params: {
-    symbol: symbol
+    pair: pair
     quantity: number
-    strategie: Strategies
+    strategy: Strategies
   }
 }
 
@@ -25,7 +25,7 @@ interface RevertEvent {
   type: 'REVERT',
   params: {
     reason: string
-    strategie: Strategies
+    strategy: Strategies
   }
 }
 

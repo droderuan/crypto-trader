@@ -7,7 +7,7 @@
 
 // interface WalletConfig {
 //   binanceClient: BinanceClient,
-//   symbol: PairInfo,
+//   pair: PairInfo,
 //   orderEvent: OrderEventEmitter
 // }
 
@@ -33,7 +33,7 @@
 //   orderEvent: OrderEventEmitter
 
 //   constructor(config: WalletConfig ) {
-//     this.PairInfo = config.symbol
+//     this.PairInfo = config.pair
 //     this.orderEvent = config.orderEvent
 //   }
 
@@ -43,7 +43,7 @@
 //     return Number(splitted[0]+'.'+fixed)
 //   }
 
-//   async startBalanceAndOrderUpdate(symbol: PairInfo) {
+//   async startBalanceAndOrderUpdate(pair: PairInfo) {
 //     binanceClient.createWsBalanceAndOrderUpdate({
 //       balanceCallback: (balance) => this.balanceUpdate(balance),
 //       orderCallback: (order) => this.orderUpdate(order)
@@ -95,7 +95,7 @@
 //       const quantity = this.fixeNumber(Number(this.balance[this.sellWith].available))
 //       logger.log('WALLET', `${quantity} of ${this.sellWith}`)
 //       if(quantity >= this.minimumValue){
-//         this.currentValue = await this.binanceClient.currentPrice(this.symbol)
+//         this.currentValue = await this.binanceClient.currentPrice(this.pair)
 //         logger.log('WALLET', `Selling ${quantity} of ${this.sellWith}`)
 //         this.lastOrder = await this.binanceClient.createSellOrder(coin, quantity, this.currentValue)
 //         this.awaitOrderToFill((orderStatus) => {

@@ -6,18 +6,20 @@ import { Pairs } from "../../../types/Pair";
 import { Order } from "../../../types/Order";
 import { PairInfo } from '../../../types/Pair';
 import logger from "../../../utils/logger";
-import { PairsResponseDTO } from '../dtos/SymbolResponseDTO';
+import { PairsResponseDTO } from '../dtos/PairResponseDTO';
 
 import { CandlestickParser } from './parsers/CandleParser'
 import { SymbolParser } from './parsers/SymbolParser';
-import { BalanceUpdateDTO, updateBalanceDTO } from '../dtos/BalanceWebSocketDTO';
+import { updateBalanceWsDTO } from '../dtos/BalanceWebSocketDTO';
 import { Balance } from '../../services/WalletUserService';
 import { BalanceParser } from './parsers/BalanceParser';
 import { OrderParser } from './parsers/OrderParser';
 import { BalanceResponseDTO } from '../dtos/BalanceResponseDTO';
+import CandleWsResponseDTO from '../dtos/CandleWebSocketResponseDTO';
+import { PairOrderResponseDTO } from '../dtos/PairOrderResponseDTO';
 
 interface historicalParams {
-  symbol: Pairs
+  pair: Pairs
   interval: CandleInterval
   window?: Window
 }
@@ -39,15 +41,15 @@ class BinanceClient {
     this.client = client
   }
 
-  async getHistorical({ symbol, interval = '5m', window = 20 }: historicalParams) {
-    logger.log('BINANCE CLIENT', `getting historical price of ${symbol}`)
+  async getHistorical({ pair, interval = '5m', window = 20 }: historicalParams) {
+    logger.log('BINANCE CLIENT', `getting historical price of ${pair}`)
     return new Promise<Candlestick[]>((resolve, reject) => {
-      this.client.candlesticks(symbol, interval, (error: any, ticks: any[], symbol: any) => {
+      this.client.candlesticks(pair, interval, (error: any, ticks: any[], pair: any) => {
         if (error) {
           reject(error)
           return
         }
-        const parsedTicks = CandlestickParser.parseHistorical(symbol, interval, ticks)
+        const parsedTicks = CandlestickParser.parseHistorical(pair, interval, ticks)
 
         resolve(parsedTicks)
         return 
@@ -55,32 +57,15 @@ class BinanceClient {
     });
   }
 
-  async getLastCandle({ symbol, interval = '5m' }: historicalParams): Promise<null | Candlestick> {
-    logger.log('BINANCE CLIENT', `getting last candle of ${symbol} with size ${interval}`)
+  async currentPrice(pair: Pairs): Promise<number>{
     return new Promise((resolve, reject) => {
-    this.client.candlesticks(symbol, interval, async (error: any, ticks: any[], symbol: any) => {
-      if (error) {
-        reject(error)
-        return
-      }
-
-      const parsedTicks = CandlestickParser.parseHistorical(symbol, interval, ticks)
-      resolve(parsedTicks[0])
-      return
-    }, { limit: 1 });
-  })
-
-  }
-
-  async currentPrice(symbol: Pairs): Promise<number>{
-    return new Promise((resolve, reject) => {
-      logger.log('BINANCE CLIENT', `Getting current value of ${symbol}`)
-      this.client.prices(symbol, (error: any, ticker: {[key: string]: string}) => {
+      logger.log('BINANCE CLIENT', `Getting current value of ${pair}`)
+      this.client.prices(pair, (error: any, ticker: {[key: string]: string}) => {
         if (error) {
           reject(error)
           return
         }
-        resolve(parseFloat(ticker[symbol]))
+        resolve(parseFloat(ticker[pair]))
         return
       });
     })
@@ -142,23 +127,37 @@ class BinanceClient {
 
   async orderStatus(order: Order): Promise<Order> {
     logger.log('BINANCE CLIENT', `Checking order status: ${order.id}`)
-    return this.client.orderStatus(order.symbol, order.id)  
+    return this.client.orderStatus(order.pair, order.id)  
   }
 
   async cancelOrder(order: Order): Promise<void> {
     logger.log('BINANCE CLIENT', `Canceling order ${order.id}`)
-    this.client.cancel(order.symbol, order.id)
+    this.client.cancel(order.pair, order.id)
     logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
   }
 
-  async PairInfo(symbol: Pairs): Promise<PairInfo> {
-    const response = await this.axios.get<PairsResponseDTO>(`https://api.binance.com/api/v3/exchangeInfo?symbol=${symbol}`)
+  async lastOrder(pair: Pairs): Promise<Order> {
+    return new Promise<Order>((resolve, reject) => {
+      this.client.allOrders(pair, (error, orders: PairOrderResponseDTO[], symbol) => {
+        if(error){
+          reject(error)
+          return
+        }
+        const parsedOrder = OrderParser.parsePairOrder(orders[0])
+        resolve(parsedOrder)
+      }, {limit:1});
+    })
+
+  }
+
+  async PairInfo(pair: Pairs): Promise<PairInfo> {
+    const response = await this.axios.get<PairsResponseDTO>(`https://api.binance.com/api/v3/exchangeInfo?symbol=${pair}`)
 
     return SymbolParser.parse(response.data)[0]
   }
 
   async createWsBalanceAndOrderUpdate({ balanceCallback, orderCallback }: { balanceCallback: (balance: Balance) => void, orderCallback: (order: Order) => void }) {
-    this.client.websockets.userData((update: updateBalanceDTO) => {
+    this.client.websockets.userData((update: updateBalanceWsDTO) => {
       switch(update.e){
         case 'outboundAccountPosition':
           const parsedBalance = BalanceParser.parse(update)
@@ -172,6 +171,13 @@ class BinanceClient {
           break
       }
     })
+  }
+
+  async createWsCandleStickUpdate({ pair, updateCallback }: {pair: Pairs, updateCallback: (candlestick: Candlestick) => void}) {
+    this.client.websockets.candlesticks(pair, '1m', (candlestickData: CandleWsResponseDTO) => {
+      const candlestick = CandlestickParser.parse(candlestickData);
+      updateCallback(candlestick)
+    });
   }
 }
 

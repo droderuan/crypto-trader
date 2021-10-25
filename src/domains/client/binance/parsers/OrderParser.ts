@@ -1,10 +1,11 @@
 import { Order } from "../../../../types/Order"
-import { OrderUpdateDTO } from "../../dtos/BalanceWebSocketDTO"
+import { OrderWsUpdateDTO } from "../../dtos/BalanceWebSocketDTO"
+import { PairOrderResponseDTO } from "../../dtos/PairOrderResponseDTO"
 
 export class OrderParser {
-  static parse(order: OrderUpdateDTO): Order {
+  static parse(order: OrderWsUpdateDTO): Order {
     return {
-      symbol: order.s,
+      pair: order.s,
       id: order.i,
       clientOrderId: order.c,
       eventTime: order.E,
@@ -16,6 +17,22 @@ export class OrderParser {
       lastExecutedQuantity: parseFloat(order.l),
       side: order.S,
       creationTime: order.O
+    } as Order
+  }
+
+  static parsePairOrder(order: PairOrderResponseDTO): Order {
+    return {
+      pair: order.symbol,
+      id: order.orderId,
+      clientOrderId: order.clientOrderId,
+      eventTime: order.updateTime,
+      price: parseFloat(order.price),
+      quantity: parseFloat(order.origQty),
+      type: order.type,
+      status: order.status,
+      lastExecutedQuantity: parseFloat(order.executedQty),
+      side: order.side,
+      creationTime: order.time
     } as Order
   }
 }

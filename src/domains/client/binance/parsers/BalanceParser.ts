@@ -1,9 +1,9 @@
 import { Balance } from "../../../services/WalletUserService"
 import { BalanceResponseDTO } from "../../dtos/BalanceResponseDTO"
-import { BalanceUpdateDTO } from "../../dtos/BalanceWebSocketDTO"
+import { BalanceWsUpdateDTO } from "../../dtos/BalanceWebSocketDTO"
 
 export class BalanceParser {
-  static parse(lastBalance: BalanceUpdateDTO ): Balance {
+  static parse(lastBalance: BalanceWsUpdateDTO ): Balance {
     return lastBalance.B.reduce((Pairs, value) => ({
       ...Pairs,
       [value.a]: {

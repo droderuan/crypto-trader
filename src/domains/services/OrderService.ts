@@ -8,7 +8,7 @@ interface CreateOrder{
 
 class OrderService {
   async create({PairInfo}: CreateOrder){
-    const pair = PairInfo.symbol
+    const pair = PairInfo.pair
     const currentValue = await binanceClient.currentPrice(pair)
     const quantityWithoufix = Number(this.balance[this.buyWith].available) / this.currentValue
     const quantity = this.fixeNumber(quantityWithoufix)
