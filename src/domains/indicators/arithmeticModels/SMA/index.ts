@@ -55,7 +55,7 @@ class SMA {
   }
 
   update(newCandle: Candlestick, log=true) {
-    logger.log('INDICATOR', `SMA - updating model..`)
+    // logger.log('INDICATOR', `SMA - updating model..`)
 
     let lastIndex = this.candles.length - 1
     let lastCandle = this.candles[lastIndex]
@@ -71,7 +71,7 @@ class SMA {
   updateLastSma({newCandle, lastCandleIndex}: { newCandle: Candlestick, lastCandleIndex: number}) {
     let lastCandle = this.candles[lastCandleIndex]
     if (lastCandle[this.candleReferenceValue] === newCandle[this.candleReferenceValue]){
-      logger.log('INDICATOR', `SMA - no changes`)
+      // logger.log('INDICATOR', `SMA - no changes`)
       return
     } else {
       this.candles[lastCandleIndex] = newCandle

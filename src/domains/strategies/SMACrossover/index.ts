@@ -84,11 +84,11 @@ export class SmaCrossover extends GenericStrategy {
   }
 
   async update(newCandle: Candlestick) {
-    logger.log('STRATEGIE', `SMA Crossover - updating faster model`)
+    // logger.log('STRATEGIE', `SMA Crossover - updating faster model`)
     this.faster.update(newCandle, false)
-    logger.log('STRATEGIE', `SMA Crossover - updating slower model`)
+    // logger.log('STRATEGIE', `SMA Crossover - updating slower model`)
     this.slower.update(newCandle, false)
-    this.log()
+    // this.log()
   }
 
   log() {

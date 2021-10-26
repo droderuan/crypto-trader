@@ -34,6 +34,7 @@ class OrderService {
 
     try {
       await binanceClient.createBuyOrder(pair, fixedQuantity, currentValue)
+      return currentValue
     } catch(err) {
       console.log(err)
     }
@@ -49,8 +50,12 @@ class OrderService {
     }
 
     logger.log('ORDER SERVICE', `Selling ${quantity} ${sellCoin} of ${pair} at ${currentValue}`)
-
-    await binanceClient.createSellOrder(pair, fixedQuantity, currentValue)
+    try {
+      await binanceClient.createSellOrder(pair, fixedQuantity, currentValue)
+      return currentValue
+    } catch(err) {
+      console.log(err)
+    }
   }
 }
 

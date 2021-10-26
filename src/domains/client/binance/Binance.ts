@@ -32,7 +32,7 @@ class BinanceClient {
     const client = new Binance().options({
       APIKEY: apiKey,
       APISECRET: apiSecret,
-      recvWindow: 10000,
+      recvWindow: 30000,
       useServerTime,
       test
     })
@@ -101,7 +101,7 @@ class BinanceClient {
         };
         const parsedOrder = OrderParser.parsePairOrder(response)
 
-        logger.log('BINANCE CLIENT', `Buy order finish`)
+        logger.log('BINANCE CLIENT', `Buy order created`)
         logger.log('BINANCE CLIENT', `Buy order: ${parsedOrder.id}`)
 
         resolve(parsedOrder)
@@ -119,7 +119,7 @@ class BinanceClient {
           return
         };
         const parsedOrder = OrderParser.parsePairOrder(response)
-        logger.log('BINANCE CLIENT', `Sell order finish`)
+        logger.log('BINANCE CLIENT', `Sell order created`)
         logger.log('BINANCE CLIENT', `Sell order: ${parsedOrder.id}`)
 
         resolve(parsedOrder)
@@ -135,8 +135,18 @@ class BinanceClient {
 
   async cancelOrder(order: Order): Promise<void> {
     logger.log('BINANCE CLIENT', `Canceling order ${order.id}`)
-    this.client.cancel(order.pair, order.id)
-    logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
+    return new Promise((resolve, reject) => {
+      this.client.cancel(order.pair, order.id, (error: any, response: any) => {
+        if(error){
+          reject(error)
+          return
+        }
+        
+        logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
+        resolve(response)
+        return
+      })
+    })
   }
 
   async lastOrder(pair: Pairs): Promise<Order | null> {

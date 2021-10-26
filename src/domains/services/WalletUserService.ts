@@ -28,6 +28,7 @@ class UserWalletService {
   private balanceToSell: CurrentBalance  = {} as CurrentBalance
   private PairInfo: PairInfo = {} as PairInfo
   private lastOrder = {} as Order
+  private lastSpentValue = 0
   private orderUpdateCallback: ((order: Order) => void) | undefined
 
   constructor(config: WalletConfig ) {
@@ -55,30 +56,33 @@ class UserWalletService {
   }
 
   private balanceUpdate(balances: Balance){
-    if(!balances[this.PairInfo.buyCoin]) {
-      throw new AppError('WALLET', `No balance found for ${this.PairInfo.buyCoin}`)
+    let logBalance = false
+    if(balances[this.PairInfo.buyCoin]) {
+      this.balanceToBuy = {
+        ...balances[this.PairInfo.buyCoin],
+        coin: this.PairInfo.buyCoin
+      }
+      logBalance = true
+    }
+    
+    if(balances[this.PairInfo.sellCoin]) {
+      this.balanceToSell = {
+        ...balances[this.PairInfo.sellCoin],
+        coin: this.PairInfo.sellCoin
+      }
+      logBalance = true
     }
 
-    if(!balances[this.PairInfo.sellCoin]) {
-      throw new AppError('WALLET', `No balance found for ${this.PairInfo.sellCoin}`)
-    }
-
-    this.balanceToBuy = {
-      ...balances[this.PairInfo.buyCoin],
-      coin: this.PairInfo.buyCoin
-    }
-    this.balanceToSell = {
-      ...balances[this.PairInfo.sellCoin],
-      coin: this.PairInfo.sellCoin
-    }
-
-    this.balanceUpdateLog()
+    logBalance && this.balanceUpdateLog()
   }
 
   private orderUpdate(order: Order) {
-    this.lastOrder = order
-    this.orderUpdateLog()
-    this.orderUpdateCallback && this.orderUpdateCallback(order)
+    if(order.pair === this.PairInfo.pair){
+      this.lastOrder = order
+      this.orderUpdateLog()
+      this.orderUpdateCallback && this.orderUpdateCallback(order)
+    }
+
   }
 
   getBalance() {

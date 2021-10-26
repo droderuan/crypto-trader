@@ -6,49 +6,45 @@ import BinanceClient from './domains/client/binance/Binance'
 
 logger.log('APP', 'Starting...')
 
-// export const botConfig = new BotConfig({
-//   pair: 'ADABUSD',
-//   candleSize: '5m',
-//   strategy: {
-//     name: 'SMA Crossover',
-//     config: {
-//       faster: {
-//         window: 9,
-//         reference: {
-//           toBuy: 'lowPrice',
-//           toSell: 'highPrice'
-//         }
-//       },
-//       slower: {
-//         window: 21,
-//         reference: {
-//           toBuy: 'lowPrice',
-//           toSell: 'highPrice'
-//         }
-//       }
-//     }
-//   },
-//   candleInterval: 300,
-//   updateInterval: 300,
-// })
-
 export const botConfig = new BotConfig({
   pair: 'BTCBUSD',
-  candleSize: '1m',
-  startPosition: 'EMPTY',
+  candleSize: '15m',
   strategy: {
-    name: 'Simple SMA',
+    name: 'SMA Crossover',
     config: {
-      window: 5,
-      reference: {
-        toBuy: 'lowPrice',
-        toSell: 'highPrice'
+      faster: {
+        window: 7,
+        reference: {
+          toBuy: 'lowPrice',
+          toSell: 'lowPrice'
+        }
+      },
+      slower: {
+        window: 30,
+        reference: {
+          toBuy: 'lowPrice',
+          toSell: 'highPrice'
+        }
       }
     }
   },
-  candleInterval: 300,
-  updateInterval: 300,
 })
+
+// export const botConfig = new BotConfig({
+//   pair: 'SHIBUSDT',
+//   candleSize: '1m',
+//   startPosition: 'BOUGHT',
+//   strategy: {
+//     name: 'Simple SMA',
+//     config: {
+//       window: 5,
+//       reference: {
+//         toBuy: 'lowPrice',
+//         toSell: 'highPrice'
+//       }
+//     }
+//   },
+// })
 
 export const binanceClient = new BinanceClient({
   apiKey: env.binanceApiKey,
@@ -58,4 +54,5 @@ export const binanceClient = new BinanceClient({
 
 const app = new App(botConfig)
 
-app.start()
+binanceClient.wait(() => app.start())
+

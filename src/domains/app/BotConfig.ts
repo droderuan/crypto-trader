@@ -22,8 +22,6 @@ interface BotConfigParams {
   pair: Pairs
   strategy: StrategieConfig
   candleSize: CandleInterval
-  updateInterval: number
-  candleInterval: number
   startPosition?: Position
 }
 

@@ -27,8 +27,8 @@ export class SimpleSMA extends GenericStrategy {
   }
 
   decision(): StrategyDecision {
-    logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
-    this.log()
+    // logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
+    // this.log()
 
     const candle = this.sma.lastCandle()
     const lastSmaValue = this.sma.lastSma()
@@ -42,13 +42,13 @@ export class SimpleSMA extends GenericStrategy {
   }
 
   async update(newCandle: Candlestick) {
-    logger.log('STRATEGIE', `Simple SMA - updating indicator`)
+    // logger.log('STRATEGIE', `Simple SMA - updating indicator`)
     this.sma.update(newCandle, false)
-    this.log()
+    // this.log()
   }
 
   verifyOpportunity() {
-    logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
+    // logger.log('STRATEGIE', `Simple SMA - checking if candle is above or below`)
     const smaValues = this.sma.smaValues
     const candleReference = this.sma.getCandleReference()
     const lastSmaValue = smaValues[smaValues.length-1]
@@ -66,7 +66,6 @@ export class SimpleSMA extends GenericStrategy {
 
     this.sma.setReferenceValue(reference)
   }
-
 
   log() {
     logger.log('STRATEGIE', `SIMPLE SMA`)
