@@ -26,7 +26,7 @@ class OrderService {
     const quantityWithoufix = quantity / currentValue
     const fixedQuantity = this.fixeNumber(quantityWithoufix, precisionRound)
 
-    logger.log('ORDER SERVICE', `Buying ${quantity} ${buyCoin} of ${pair} at ${currentValue}`)
+    logger.log({from: 'ORDER SERVICE', message: `Buying ${quantity} ${buyCoin} of ${pair} at ${currentValue}`})
         
     if (fixedQuantity < minQty) {
       throw new AppError('CREATE BUY ORDER', `Quantity ${quantity} is less than minimum: ${minQty}`)
@@ -49,7 +49,7 @@ class OrderService {
       throw new AppError('CREATE SELL ORDER', `Quantity ${quantity} is less than minimum: ${minQty}`)
     }
 
-    logger.log('ORDER SERVICE', `Selling ${quantity} ${sellCoin} of ${pair} at ${currentValue}`)
+    logger.log({from: 'ORDER SERVICE', message: `Selling ${quantity} ${sellCoin} of ${pair} at ${currentValue}`})
     try {
       await binanceClient.createSellOrder(pair, fixedQuantity, currentValue)
       return currentValue

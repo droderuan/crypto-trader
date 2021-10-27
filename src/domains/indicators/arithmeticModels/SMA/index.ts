@@ -5,6 +5,7 @@ import { SimpleSmaConfig } from "../../../strategies/SimpleSMA"
 export interface SmaConfig {
   initialValues: Candlestick[]
   window: Window
+  log?: boolean
 }
 
 class SMA {
@@ -13,16 +14,18 @@ class SMA {
   private step: number = 0
   private candleReferenceValue: CandleStickReference = 'closePrice'
   smaValues: number[] = []
+  private log = false
 
-  config({ initialValues, window }: SmaConfig) {
-    logger.log('INDICATOR', `SMA - initializing`)
+  config({ initialValues, window, log=false }: SmaConfig) {
+   this.log && logger.log({from: 'INDICATOR', message: `SMA - initializing`})
 
     this.candles = initialValues
     this.window = window
     this.step = window - 1
+    this.log = log
     this.initialCalculate()
 
-    logger.log('INDICATOR', `SMA - initialized`)
+   this.log && logger.log({from: 'INDICATOR', message: `SMA - initialized`})
   }
 
   private calculate(index: number) {
@@ -34,7 +37,7 @@ class SMA {
 
   private initialCalculate() {
     if (this.candles.length < this.window) {
-      throw new Error(`Not enough data for a ${window} window`)
+      throw new Error(`Not enough data for a ${this.window} window`)
     }
 
     this.smaValues = this.candles.map((_, index) => {
@@ -55,7 +58,7 @@ class SMA {
   }
 
   update(newCandle: Candlestick, log=true) {
-    // logger.log('INDICATOR', `SMA - updating model..`)
+    //this.log && logger.log({from: 'INDICATOR', message: `SMA - updating model..`})
 
     let lastIndex = this.candles.length - 1
     let lastCandle = this.candles[lastIndex]
@@ -65,13 +68,13 @@ class SMA {
     } else {
       this.updateSma({ newCandle, lastCandleIndex: lastIndex })
     }
-    log && this.log()
+    log && this.logUpdates()
   }
 
   updateLastSma({newCandle, lastCandleIndex}: { newCandle: Candlestick, lastCandleIndex: number}) {
     let lastCandle = this.candles[lastCandleIndex]
     if (lastCandle[this.candleReferenceValue] === newCandle[this.candleReferenceValue]){
-      // logger.log('INDICATOR', `SMA - no changes`)
+      //this.log && logger.log({from: 'INDICATOR', message: `SMA - no changes`})
       return
     } else {
       this.candles[lastCandleIndex] = newCandle
@@ -79,8 +82,8 @@ class SMA {
       const lastSmaIndex = this.smaValues.length-1
       this.smaValues[lastSmaIndex] = smaValue
       
-      logger.log('INDICATOR', `SMA - last candle[${this.candleReferenceValue}] value ${newCandle[this.candleReferenceValue]}`)
-      logger.log('INDICATOR', `SMA - last sma value ${smaValue}`)
+     this.log && logger.log({from: 'INDICATOR', message: `SMA - last candle[${this.candleReferenceValue}] value ${newCandle[this.candleReferenceValue]}`})
+     this.log && logger.log({from: 'INDICATOR', message: `SMA - last sma value ${smaValue}`})
     }
   }
 
@@ -90,8 +93,8 @@ class SMA {
 
     const currentSMAValue = this.calculate(lastCandleIndex)
     this.smaValues.push(currentSMAValue)
-    logger.log('INDICATOR', `SMA - last candle[${this.candleReferenceValue}] value ${newCandle[this.candleReferenceValue]}`)
-    logger.log('INDICATOR', `SMA - last sma value ${currentSMAValue}`)
+   this.log && logger.log({from: 'INDICATOR', message: `SMA - last candle[${this.candleReferenceValue}] value ${newCandle[this.candleReferenceValue]}`})
+   this.log && logger.log({from: 'INDICATOR', message: `SMA - last sma value ${currentSMAValue}`})
   }
 
   lastSma() {
@@ -108,20 +111,21 @@ class SMA {
     return current.join(' - ')
   }
 
-  log() {
+  logUpdates() {
     const currentCandle = this.candles.slice(this.smaValues.length - 5)
 
     const parsed = currentCandle.reduce((str, candle) => {
       return str.length > 1 ? `${str} - ${candle[this.candleReferenceValue]}` : String(candle[this.candleReferenceValue])
     }, '')
 
-    logger.log('INDICATOR', `SMA - using ${this.candleReferenceValue} price`)
-    console.table({
+    this.log && logger.log({from: 'INDICATOR', message: `SMA - using ${this.candleReferenceValue} price`})
+    this.log && console.table({
       "last 5 SMA values": this.currentSMA(),
       "last 5 pair prices": parsed, 
       [`Last ${this.candleReferenceValue}`]: currentCandle[currentCandle.length-1][this.candleReferenceValue]
     })
   }
+  
 }
 
 export default SMA

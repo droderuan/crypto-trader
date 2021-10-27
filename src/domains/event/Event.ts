@@ -1,4 +1,4 @@
-import { PairInfo, Pairs } from "../../types/Pair";
+import { PairInfo } from "../../types/Pair";
 import logger from "../../utils/logger";
 import { Strategies } from "../strategies/types";
 
@@ -69,7 +69,7 @@ class OrderEventEmitter {
   }
 
   emitter(event: OrderEmitterTypes){
-    logger.log('EVENT', `${event}`)
+    logger.log({from: 'EVENT', message: `${event}`, bold: true})
     this.listeners[event].forEach(action => action(event))
   }
 }

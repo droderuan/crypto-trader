@@ -1,69 +1,60 @@
-import chalk from 'chalk';
+import chalk, { ChalkFunction } from 'chalk';
 
 type AppModules = 'APP' | 'BINANCE CLIENT' | 'INDICATOR' | 'EVENT' | 'WALLET' | 'ERROR' | 'REFEREE' | 'STRATEGIE' | 'STRATEGIE BUILDER' | 'CRYPTO APP' | 'ORDER SERVICE'
 
+interface Log {
+  from: AppModules
+  message: string
+  bold?: boolean
+  type?: 'ERROR' | 'LOG' | 'SUCCESS'
+}
+
 const colors = {
-  app: chalk.bold.hex('#fafafa'),
-  error: chalk.bold.hex('#b71c1c'),
-  event: chalk.bold.hex('ffff00'),
-  binance: chalk.hex('#ff9800'),
-  cryptoApp: chalk.hex('#cddc39'),
-  strategie: chalk.hex('#b85cff'),
-  wallet: chalk.hex('#b0fcff'),
-  referee: chalk.hex('#a1887f'),
-  indicator: chalk.hex('#039be5'),
-  orderService: chalk.hex('#a5d6a7'),
-  time: chalk.hex('#81c784')
+  APP: '#fafafa',
+  ERROR: '#b71c1c',
+  SUCCESS: '#00e676',
+  EVENT: 'ffff00',
+  BINANCE: '#ff9800',
+  'CRYPTO APP': '#cddc39',
+  STRATEGIE: '#b85cff',
+  WALLET: '#b0fcff',
+  REFEREE: '#a1887f',
+  INDICATOR: '#039be5',
+  'ORDER SERVICE': '#a5d6a7',
+  TIME: '#76ff03'
+}
+
+const chalkObject = {
+  'SUCCESS': {
+    fromLog: () => chalk.bgHex(colors.SUCCESS),
+    messageLog: (color: string) => chalk.hex(color)
+  },
+  'ERROR': {
+    fromLog: () => chalk.bgHex(colors.ERROR),
+    messageLog: (color: string) => chalk.hex(color)
+  }, 
+  'LOG': {
+    fromLog: (color: string) => chalk.hex(color),
+    messageLog: (color: string) => chalk.hex(color)
+  },
+  'BOLD': {
+    fromLog: (color: string) => chalk.bgHex(color),
+    messageLog: (color: string) => chalk.bold.hex(color)
+  }
 }
 
 const logger =  {
-  log: (from: AppModules, message: string, type?: 'green' | 'red') => {
+  log: ({ from, message, bold, type='LOG' }: Log) => {
     const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-    const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -5);
+    let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -5);
+    localISOTime = localISOTime.replaceAll('-', '/').replace('T',' ')
     
-    switch(from){
-      case 'APP':
-        console.log(colors.time(localISOTime) + ' ' + colors.app(`[${from}] ${message}`))
-        break
-      case 'BINANCE CLIENT':
-        console.log(colors.time(localISOTime) + ' ' + colors.binance(`[${from}] ${message}`))
-        break
-      case 'CRYPTO APP':
-        if(type){
-          if(type === 'green'){
-            console.log(colors.time(localISOTime) + ' ' + colors.cryptoApp(`[${from}]`) + chalk.green.bold(` ${message}`))
-          } else if(type === 'red'){
-            console.log(colors.time(localISOTime) + ' ' + colors.cryptoApp(`[${from}]`) + colors.error(` ${message}`))
-          }
-        } else {
-          console.log(colors.time(localISOTime) + ' ' + colors.cryptoApp(`[${from}] ${message}`))
-        }
-        break
-      case 'ERROR':
-        console.log(colors.time(localISOTime) + ' ' + colors.error(`[${from}] ${message}`))
-        break
-      case 'EVENT':
-        console.log(colors.time(localISOTime) + ' ' + chalk.hex('#000').bgYellow(`[${from}]`) + colors.event(` ${message}`))
-        break
-      case 'INDICATOR':
-        console.log(colors.time(localISOTime) + ' ' + colors.indicator(`[${from}] ${message}`))
-        break
-      case 'REFEREE':
-        console.log(colors.time(localISOTime) + ' ' + colors.referee(`[${from}] ${message}`))
-        break
-      case 'STRATEGIE':
-        console.log(colors.time(localISOTime) + ' ' + colors.strategie(`[${from}] ${message}`))
-        break
-      case 'STRATEGIE BUILDER':
-        console.log(colors.time(localISOTime) + ' ' + colors.strategie(`[${from}] ${message}`))
-        break
-      case 'WALLET':
-        console.log(colors.time(localISOTime) + ' ' + colors.wallet(`[${from}] ${message}`))
-        break
-      case 'ORDER SERVICE':
-        console.log(colors.time(localISOTime) + ' ' + chalk.hex('#000').bgGreen(`[${from}]`) + colors.orderService(` ${message}`))
-        break
-    }
+    const timeLog = chalk.hex(colors.TIME)
+    const color = colors[from] as string
+
+   const { fromLog, messageLog } = bold ? chalkObject.BOLD : chalkObject[type]
+    
+   console.log(`[${fromLog(color)(from)}] \t${timeLog(localISOTime)} \t${messageLog(color)(message)}`)
   }
 }
 export default logger

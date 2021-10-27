@@ -43,7 +43,7 @@ class BinanceClient {
   }
 
   async getHistorical({ pair, interval = '5m', window = 20 }: historicalParams) {
-    logger.log('BINANCE CLIENT', `getting historical price of ${pair}`)
+    logger.log({from: 'BINANCE CLIENT', message: `getting historical price of ${pair}`})
     return new Promise<Candlestick[]>((resolve, reject) => {
       this.client.candlesticks(pair, interval, (error: any, ticks: any[], pair: any) => {
         if (error) {
@@ -60,7 +60,7 @@ class BinanceClient {
 
   async currentPrice(pair: Pairs): Promise<number>{
     return new Promise((resolve, reject) => {
-      logger.log('BINANCE CLIENT', `Getting current value of ${pair}`)
+      logger.log({from: 'BINANCE CLIENT', message: `Getting current value of ${pair}`})
       this.client.prices(pair, (error: any, ticker: {[key: string]: string}) => {
         if (error) {
           reject(error)
@@ -91,7 +91,7 @@ class BinanceClient {
   }
 
   async createBuyOrder(coin: Pairs, quantity: number, price: number): Promise<Order> {
-    logger.log('BINANCE CLIENT', `Creating a buy order`)
+    logger.log({from: 'BINANCE CLIENT', message: `Creating a buy order`})
     
     return new Promise((resolve, reject) => {
       this.client.buy(coin, quantity, price, {type:'LIMIT'}, (error, response: PairOrderResponseDTO) => {
@@ -101,8 +101,8 @@ class BinanceClient {
         };
         const parsedOrder = OrderParser.parsePairOrder(response)
 
-        logger.log('BINANCE CLIENT', `Buy order created`)
-        logger.log('BINANCE CLIENT', `Buy order: ${parsedOrder.id}`)
+        logger.log({from: 'BINANCE CLIENT', message: `Buy order created`})
+        logger.log({from: 'BINANCE CLIENT', message: `Buy order: ${parsedOrder.id}`})
 
         resolve(parsedOrder)
         return
@@ -111,7 +111,7 @@ class BinanceClient {
   }
 
   async createSellOrder(coin: Pairs, quantity: number, price: number): Promise<Order> {
-    logger.log('BINANCE CLIENT', `Creating a sell order`)
+    logger.log({from: 'BINANCE CLIENT', message: `Creating a sell order`})
     return new Promise((resolve, reject) => {
       this.client.sell(coin, quantity, price, {type:'LIMIT'}, (error, response: PairOrderResponseDTO) => {
         if(error) {
@@ -119,8 +119,8 @@ class BinanceClient {
           return
         };
         const parsedOrder = OrderParser.parsePairOrder(response)
-        logger.log('BINANCE CLIENT', `Sell order created`)
-        logger.log('BINANCE CLIENT', `Sell order: ${parsedOrder.id}`)
+        logger.log({from: 'BINANCE CLIENT', message: `Sell order created`})
+        logger.log({from: 'BINANCE CLIENT', message: `Sell order: ${parsedOrder.id}`})
 
         resolve(parsedOrder)
         return
@@ -129,12 +129,12 @@ class BinanceClient {
   }
 
   async orderStatus(order: Order): Promise<Order> {
-    logger.log('BINANCE CLIENT', `Checking order status: ${order.id}`)
+    logger.log({from: 'BINANCE CLIENT', message: `Checking order status: ${order.id}`})
     return this.client.orderStatus(order.pair, order.id)  
   }
 
   async cancelOrder(order: Order): Promise<void> {
-    logger.log('BINANCE CLIENT', `Canceling order ${order.id}`)
+    logger.log({from: 'BINANCE CLIENT', message: `Canceling order ${order.id}`})
     return new Promise((resolve, reject) => {
       this.client.cancel(order.pair, order.id, (error: any, response: any) => {
         if(error){
@@ -142,7 +142,7 @@ class BinanceClient {
           return
         }
         
-        logger.log('BINANCE CLIENT', `Order canceled: ${order.id}`)
+        logger.log({from: 'BINANCE CLIENT', message: `Order canceled: ${order.id}`})
         resolve(response)
         return
       })
@@ -171,7 +171,7 @@ class BinanceClient {
   }
 
   async createWsBalanceAndOrderUpdate({ balanceCallback, orderCallback }: { balanceCallback: (balance: Balance) => void, orderCallback: (order: Order) => void }) {
-    logger.log('BINANCE CLIENT', 'Starting websocket to update account balance')
+    logger.log({from: 'BINANCE CLIENT', message: 'Starting websocket to update account balance'})
     this.client.websockets.userData((update: updateBalanceWsDTO) => {
       switch(update.e){
         case 'outboundAccountPosition':
@@ -187,7 +187,7 @@ class BinanceClient {
   }
 
   async createWsCandleStickUpdate({ pair, updateCallback }: {pair: Pairs, updateCallback: (candlestick: Candlestick) => void}) {
-    logger.log('BINANCE CLIENT', 'Starting websocket to update pair candlestick')
+    logger.log({from: 'BINANCE CLIENT', message: 'Starting websocket to update pair candlestick'})
     this.client.websockets.candlesticks(pair, '1m', (candlestickData: CandleWsResponseDTO) => {
       const candlestick = CandlestickParser.parse(candlestickData);
       updateCallback(candlestick)

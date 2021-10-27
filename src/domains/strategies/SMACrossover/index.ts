@@ -42,7 +42,7 @@ export class SmaCrossover extends GenericStrategy {
       throw new Error("Undefined params");
     }
 
-    logger.log('STRATEGIE', `SMA Crossover - initializing`)
+    logger.log({from: 'STRATEGIE', message: `SMA Crossover - initializing`})
 
     this.params = params
 
@@ -52,7 +52,7 @@ export class SmaCrossover extends GenericStrategy {
     this.slower = new SMA()
     this.slower.config({ initialValues, window: params.slower.window })
 
-    logger.log('STRATEGIE', `SMA Crossover - initialized`)
+    logger.log({from: 'STRATEGIE', message: `SMA Crossover - initialized`})
 
   }
 
@@ -95,10 +95,8 @@ export class SmaCrossover extends GenericStrategy {
     const currentFasterSmaValue = this.faster.currentSMA()
     const currentSlowerSmaValue = this.slower.currentSMA()
 
-    logger.log('STRATEGIE', `SMA Crossover`)
-    console.table({
-      "current faster SMA": currentFasterSmaValue,
-      "current slower SMA": currentSlowerSmaValue,
-    })
+    logger.log({from: 'STRATEGIE', message: `SMA Crossover`})
+    logger.log({from: 'STRATEGIE', message: `current faster SMA \t${currentFasterSmaValue}`})
+    logger.log({from: 'STRATEGIE', message: `current slower SMA \t${currentSlowerSmaValue}`})
   }
 }

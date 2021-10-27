@@ -33,7 +33,7 @@ class CryptoAppService {
     let currentPosition = this.botConfig.config.startPosition
     
     if(!currentPosition) {
-      logger.log('CRYPTO APP', 'No start position detected - looking for the last order...')
+      logger.log({from: 'CRYPTO APP', message: 'No start position detected - looking for the last order...'})
       const lastCandle = await binanceClient.lastOrder(this.pair.pair)
       if(!lastCandle){
         currentPosition = 'EMPTY'
@@ -41,7 +41,7 @@ class CryptoAppService {
         if (lastCandle.status !== 'FILLED') throw new AppError('Getting initial position', `Last candle status: ${lastCandle.status}. Unable to set inicial position. Set manually on bot config.`)
         currentPosition = lastCandle.side === 'BUY' ? 'BOUGHT' : 'EMPTY'
       }
-      logger.log('CRYPTO APP', `Using start position: ${currentPosition}`)
+      logger.log({from: 'CRYPTO APP', message: `Using start position: ${currentPosition}`})
     }
 
     this.position = currentPosition
@@ -70,7 +70,7 @@ class CryptoAppService {
   }
 
   async setPairInfo(pair: Pairs) {
-    logger.log('CRYPTO APP', 'Getting pair info')
+    logger.log({from: 'CRYPTO APP', message: 'Getting pair info'})
     try {
       const PairInfo = await binanceClient.PairInfo(pair)
       this.pair = PairInfo
@@ -88,7 +88,7 @@ class CryptoAppService {
   }
 
   startUpdateStrategie() {
-    logger.log('CRYPTO APP', 'Initializing strategy update')
+    logger.log({from: 'CRYPTO APP', message: 'Initializing strategy update'})
     binanceClient.createWsCandleStickUpdate({ 
       pair: this.pair.pair, 
       updateCallback: async (candle) => {
@@ -115,7 +115,7 @@ class CryptoAppService {
         this.orderLock = false
       }
     } else {
-      logger.log('CRYPTO APP', 'On order lock. Waiting current order to finish')
+      logger.log({from: 'CRYPTO APP', message: 'On order lock. Waiting current order to finish', bold: true})
     }
   }
 
@@ -137,8 +137,8 @@ class CryptoAppService {
       }
     } else {
       const lastOrder = this.wallet.getLastOrder()
-      logger.log('CRYPTO APP', 'On order lock. Waiting current order to finish')
-      logger.log('CRYPTO APP', `Order: ${lastOrder.id} status: ${lastOrder.status} side: ${lastOrder.side}`)
+      logger.log({from: 'CRYPTO APP', message: 'On order lock. Waiting current order to finish'})
+      logger.log({from: 'CRYPTO APP', message: `Order: ${lastOrder.id} status: ${lastOrder.status} side: ${lastOrder.side}`})
     }
   }
 
@@ -146,7 +146,7 @@ class CryptoAppService {
     if(this.buyPrice !== 0 && this.sellPrice !== 0){
       const diff = (this.sellPrice / this.buyPrice) * 100
       const percent = `${parseFloat(String(diff)).toFixed(3)}%`
-      logger.log('CRYPTO APP', `SELLING ON ${diff > 100 ? 'PROFIT' : 'LOST'} of ${percent}`, diff > 100 ? 'green' : 'red')
+      logger.log({from: 'CRYPTO APP', message: `SELLING ON ${diff > 100 ? 'PROFIT' : 'LOST'} of ${percent}`, type: diff > 100 ? 'SUCCESS' : 'ERROR'})
     }
   }
 
@@ -154,24 +154,27 @@ class CryptoAppService {
     const interval = setInterval(async () => {
       const lastOrder = this.wallet.getLastOrder()
       if(lastOrder.status === 'FILLED') {
-        logger.log('CRYPTO APP', `Order filled: ${lastOrder.id}`)
+        logger.log({from: 'CRYPTO APP', message: `Order filled: ${lastOrder.id}`, type: 'SUCCESS'})
         clearInterval(interval)
         this.orderLock = false
         this.orderUpdateTries = 1
       } else {
-        logger.log('CRYPTO APP', `Order update tries: ${this.orderUpdateTries}`)
+        logger.log({from: 'CRYPTO APP', message: `Order update tries: ${this.orderUpdateTries}`})
         
         if(this.orderUpdateTries >= this.maxOrderUpdateTries){
-          logger.log('CRYPTO APP', `Max order update tries achieved`)
-          logger.log('CRYPTO APP', `Canceling order: ${lastOrder.id}`)
+          logger.log({from: 'CRYPTO APP', message: `Max order update tries achieved`, bold: true})
+          logger.log({from: 'CRYPTO APP', message: `Canceling order: ${lastOrder.id}`, type: 'SUCCESS'})
 
-          this.referee.reverse()
-
-          await binanceClient.cancelOrder(lastOrder).finally(() => {
+          try{
+            await binanceClient.cancelOrder(lastOrder)
+            this.referee.reverse()
             this.orderEvent.emitter('REVERT')
-            this.orderUpdateTries = 1
+          } catch(err){
+            logger.log({from: 'CRYPTO APP',message: 'While trying to cancel order. Considering it is filled', type: 'ERROR'})
+          } finally {
             this.orderLock = false
-          })
+            this.orderUpdateTries = 1
+          }
         } else {
           ++this.orderUpdateTries
         }

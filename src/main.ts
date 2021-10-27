@@ -1,14 +1,12 @@
-import logger from './utils/logger'
 import env from './utils/env'
 import App from './domains/app/App'
 import BotConfig from './domains/app/BotConfig'
 import BinanceClient from './domains/client/binance/Binance'
 
-logger.log('APP', 'Starting...')
-
 export const botConfig = new BotConfig({
-  pair: 'BTCBUSD',
+  pair: 'SHIBBUSD',
   candleSize: '15m',
+  startPosition: 'EMPTY',
   strategy: {
     name: 'SMA Crossover',
     config: {

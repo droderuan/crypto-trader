@@ -19,7 +19,7 @@ export class StrategieBuilder {
   async build({ strategieConfig, pair, candleSize  }: StrategieBuilderParams){
     this.pair = pair
     this.candleSize = candleSize
-    logger.log('STRATEGIE BUILDER', `Building strategy ${strategieConfig.name}`)
+    logger.log({from: 'STRATEGIE BUILDER', message: `Building strategy ${strategieConfig.name}`})
 
     const strategy = await this.buildStrategie(strategieConfig)
 
@@ -27,7 +27,7 @@ export class StrategieBuilder {
       throw new AppError('STRATEGIE BUILDER', `Strategie ${strategieConfig.name} could not be started`)
     }
 
-    logger.log('STRATEGIE BUILDER', 'Build finish')
+    logger.log({from: 'STRATEGIE BUILDER', message: 'Build finish'})
     return strategy
   }
 
@@ -48,14 +48,14 @@ export class StrategieBuilder {
   }
  
   private async getHistoricalCandleStick(window: Window) {
-    logger.log('STRATEGIE BUILDER', 'Loading historical candlestick data')
+    logger.log({from: 'STRATEGIE BUILDER', message: 'Loading historical candlestick data'})
 
     const candles = await binanceClient.getHistorical({ 
       pair: this.pair,
       interval: this.candleSize,
       window: window})
     if (!candles) {
-      logger.log('STRATEGIE BUILDER', 'Error while loading initial data')
+      logger.log({from: 'STRATEGIE BUILDER', message: 'Error while loading initial data'})
       throw Error('No initial candle')
     }
     return candles

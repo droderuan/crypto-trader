@@ -3,6 +3,7 @@ import BotConfig from './BotConfig'
 import CryptoAppService from '../services/cryptoAppService'
 import { StrategieBuilder } from '../strategies/StrategieBuilder'
 import OrderService from '../services/OrderService'
+import logger from '../../utils/logger'
 
 class App {
   botConfig: BotConfig
@@ -16,6 +17,8 @@ class App {
   }
 
   async start(cb?: Function) {
+    logger.log({ from: 'APP', message: 'Starting...' })
+
     const { strategy: strategieConfig, pair, candleSize } = this.botConfig.config
     const cryptoApp = new CryptoAppService()
 

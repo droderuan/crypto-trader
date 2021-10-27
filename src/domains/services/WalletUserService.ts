@@ -42,9 +42,9 @@ class UserWalletService {
       this.balanceUpdate(balanceResponse)
     } catch (err) {
       if(err instanceof AppError) {
-        logger.log('WALLET', `Error - ${err.message}`)
+        logger.log({from: 'WALLET', message: `Error - ${err.message}`})
       }
-      logger.log('ERROR', 'while updating balance')
+      logger.log({from: 'WALLET', message: 'while updating balance', type: 'ERROR'})
     }
   }
 
@@ -94,25 +94,25 @@ class UserWalletService {
   }
 
   private balanceUpdateLog() {
-    logger.log(
-      'WALLET', 
-      `BALANCE - coin: ${this.balanceToBuy.coin} \tavailable: ${this.balanceToBuy.available} \tonOrder: ${this.balanceToBuy.onOrder}`
-    )
-    logger.log(
-      'WALLET', 
-      `BALANCE - coin: ${this.balanceToSell.coin} \tavailable: ${this.balanceToSell.available} \tonOrder: ${this.balanceToSell.onOrder}`
-    )
+    logger.log({
+      from: 'WALLET', 
+      message: `BALANCE - coin: ${this.balanceToBuy.coin} \tavailable: ${this.balanceToBuy.available} \tonOrder: ${this.balanceToBuy.onOrder}`
+    })
+    logger.log({
+      from: 'WALLET', 
+      message:`BALANCE - coin: ${this.balanceToSell.coin} \tavailable: ${this.balanceToSell.available} \tonOrder: ${this.balanceToSell.onOrder}`
+    })
   }
 
   private orderUpdateLog() {
-    logger.log(
-      'WALLET', 
-      `ORDER - id: ${this.lastOrder.id} execution \ttype: ${this.lastOrder.currentExecutionType} \tprice: ${this.lastOrder.price} \tquantity: ${this.lastOrder.quantity}`
-    )
-    logger.log(
-      'WALLET', 
-      `ORDER - status: ${this.lastOrder.status} \tside: ${this.lastOrder.side}`
-    )
+    logger.log({
+      from: 'WALLET',
+      message: `ORDER - id: ${this.lastOrder.id} execution \ttype: ${this.lastOrder.currentExecutionType} \tprice: ${this.lastOrder.price} \tquantity: ${this.lastOrder.quantity}`
+    })
+    logger.log({
+      from: 'WALLET',
+      message: `ORDER - status: ${this.lastOrder.status} \tside: ${this.lastOrder.side}`
+    })
   }
 }
 

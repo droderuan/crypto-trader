@@ -19,7 +19,7 @@ class Referee {
   }
 
   judge(decision: StrategyDecision) {
-    // logger.log('REFEREE', `Strategie said ${decision}`)
+    // logger.log({from: 'REFEREE', message: `Strategie said ${decision}`})
     switch(decision){
       case('TO_BUY'):
         this.emitBuyOrder()
@@ -28,7 +28,7 @@ class Referee {
         this.emitSellOrder()
         break
       default:
-        logger.log('REFEREE', 'Doing nothing...')
+        logger.log({from: 'REFEREE', message: 'Doing nothing...'})
         break
     }
   }
@@ -39,21 +39,21 @@ class Referee {
 
   emitBuyOrder() {
     if (this.currentPosition === 'BOUGHT') {
-      // logger.log('REFEREE', `Already in BOUGHT`)
-      // logger.log('REFEREE', 'Doing nothing...')
+      // logger.log({from: 'REFEREE', message: `Already in BOUGHT`})
+      // logger.log({from: 'REFEREE', message: 'Doing nothing...'})
       return
     }
     this.orderEventEmitter.emitter('BUY')
-    logger.log('REFEREE', `Position: ${this.currentPosition}`)
+    logger.log({from: 'REFEREE', message: `Position: ${this.currentPosition}`})
   }
 
   emitSellOrder() {
     if (this.currentPosition === 'EMPTY') {
-      // logger.log('REFEREE', `Already in EMPTY`)
+      // logger.log({from: 'REFEREE', message: `Already in EMPTY`})
       return
    }
    this.orderEventEmitter.emitter('SELL')
-   logger.log('REFEREE', `Position: ${this.currentPosition}`)
+   logger.log({from: 'REFEREE', message: `Position: ${this.currentPosition}`})
   }
 
   reverse() {
