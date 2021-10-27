@@ -58,7 +58,7 @@ class SMA {
   }
 
   update(newCandle: Candlestick, log=true) {
-    //this.log && logger.log({from: 'INDICATOR', message: `SMA - updating model..`})
+    this.log && logger.log({from: 'INDICATOR', message: `SMA - updating model...`})
 
     let lastIndex = this.candles.length - 1
     let lastCandle = this.candles[lastIndex]
@@ -74,7 +74,7 @@ class SMA {
   updateLastSma({newCandle, lastCandleIndex}: { newCandle: Candlestick, lastCandleIndex: number}) {
     let lastCandle = this.candles[lastCandleIndex]
     if (lastCandle[this.candleReferenceValue] === newCandle[this.candleReferenceValue]){
-      //this.log && logger.log({from: 'INDICATOR', message: `SMA - no changes`})
+      this.log && logger.log({from: 'INDICATOR', message: `SMA - no changes`})
       return
     } else {
       this.candles[lastCandleIndex] = newCandle
@@ -98,11 +98,11 @@ class SMA {
   }
 
   lastSma() {
-    return this.smaValues[this.smaValues.length -1]
+    return this.smaValues[this.smaValues.length - 1]
   }
 
   lastCandle() {
-    return this.candles[this.candles.length -1]
+    return this.candles[this.candles.length - 1]
   }
 
   currentSMA() {
@@ -119,13 +119,10 @@ class SMA {
     }, '')
 
     this.log && logger.log({from: 'INDICATOR', message: `SMA - using ${this.candleReferenceValue} price`})
-    this.log && console.table({
-      "last 5 SMA values": this.currentSMA(),
-      "last 5 pair prices": parsed, 
-      [`Last ${this.candleReferenceValue}`]: currentCandle[currentCandle.length-1][this.candleReferenceValue]
-    })
+    this.log && logger.log({from: 'INDICATOR', message: `SMA - last 5 SMA values \t${this.currentSMA()}`})
+    this.log && logger.log({from: 'INDICATOR', message: `SMA - last 5 pair prices \t${parsed}`})
+    this.log && logger.log({from: 'INDICATOR', message: `SMA - last candle ${this.candleReferenceValue}:  \t${currentCandle[currentCandle.length-1][this.candleReferenceValue]}`})
   }
-  
 }
 
 export default SMA

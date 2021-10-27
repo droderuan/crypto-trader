@@ -13,13 +13,7 @@ class Referee {
     this.currentPosition = currentPosition
   }
 
-  updateDecision(decision: StrategyDecision) {
-    this.judge(decision)
-    console.table([{ pricePosition: decision === 'TO_SELL' ? 'below' : 'above', position: this.currentPosition}])
-  }
-
   judge(decision: StrategyDecision) {
-    // logger.log({from: 'REFEREE', message: `Strategie said ${decision}`})
     switch(decision){
       case('TO_BUY'):
         this.emitBuyOrder()

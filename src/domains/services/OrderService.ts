@@ -54,7 +54,7 @@ class OrderService {
       await binanceClient.createSellOrder(pair, fixedQuantity, currentValue)
       return currentValue
     } catch(err) {
-      console.log(err)
+      logger.log({from: 'ORDER SERVICE', message: `Error when creating a sell order: ${quantity} ${sellCoin} of ${pair} at ${currentValue}`, type: 'ERROR'})
     }
   }
 }

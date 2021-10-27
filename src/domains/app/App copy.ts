@@ -134,7 +134,7 @@
 //       if (!candle) {
 //         return
 //       }
-//       this.referee.updateDecision(this.strategy.verifyOpportunity(candle))
+//       this.referee.updateDecision(this.strategy.decision(candle))
 //     } catch (err) {
 //       logger.log('ERROR', 'on get last candle')
 //     }

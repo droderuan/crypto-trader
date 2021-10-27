@@ -6,7 +6,6 @@ import BinanceClient from './domains/client/binance/Binance'
 export const botConfig = new BotConfig({
   pair: 'SHIBBUSD',
   candleSize: '15m',
-  startPosition: 'EMPTY',
   strategy: {
     name: 'SMA Crossover',
     config: {

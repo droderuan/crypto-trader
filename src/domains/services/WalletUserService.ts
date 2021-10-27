@@ -27,8 +27,7 @@ class UserWalletService {
   private balanceToBuy: CurrentBalance  = {} as CurrentBalance
   private balanceToSell: CurrentBalance  = {} as CurrentBalance
   private PairInfo: PairInfo = {} as PairInfo
-  private lastOrder = {} as Order
-  private lastSpentValue = 0
+  private lastOrder!: Order
   private orderUpdateCallback: ((order: Order) => void) | undefined
 
   constructor(config: WalletConfig ) {
@@ -89,11 +88,11 @@ class UserWalletService {
     return {toBuy: this.balanceToBuy, toSell: this.balanceToSell }
   }
 
-  getLastOrder() {
-    return this.lastOrder
+  async getLastOrder() {
+    return this.lastOrder ? this.lastOrder :  binanceClient.lastOrder(this.PairInfo.pair)
   }
 
-  private balanceUpdateLog() {
+  balanceUpdateLog() {
     logger.log({
       from: 'WALLET', 
       message: `BALANCE - coin: ${this.balanceToBuy.coin} \tavailable: ${this.balanceToBuy.available} \tonOrder: ${this.balanceToBuy.onOrder}`

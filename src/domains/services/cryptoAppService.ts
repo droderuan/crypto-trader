@@ -34,7 +34,7 @@ class CryptoAppService {
     
     if(!currentPosition) {
       logger.log({from: 'CRYPTO APP', message: 'No start position detected - looking for the last order...'})
-      const lastCandle = await binanceClient.lastOrder(this.pair.pair)
+      const lastCandle = await this.wallet.getLastOrder()
       if(!lastCandle){
         currentPosition = 'EMPTY'
       } else {
@@ -55,6 +55,8 @@ class CryptoAppService {
 
     this.orderEvent.setListener({ event: 'BUY', execute: () => this.buy() })
     this.orderEvent.setListener({ event: 'SELL', execute: () => this.sell() })
+
+    this.routineLog()
   }
 
   setConfig(config: BotConfig) {
@@ -93,7 +95,7 @@ class CryptoAppService {
       pair: this.pair.pair, 
       updateCallback: async (candle) => {
         this.strategy.update(candle)
-        const decision = this.strategy.verifyOpportunity()
+        const decision = this.strategy.decision()
         this.referee.judge(decision)
       }
     })
@@ -102,14 +104,14 @@ class CryptoAppService {
   async buy() {
     if(!this.orderLock){
       try{
-        this.referee.updatePosition('BOUGHT')
         const buyPrice = await this.orderService.createBuyOrder({
           PairInfo: this.pair, 
           quantity: this.wallet.getBalance().toBuy.available 
         })
         this.orderLock = true
         this.buyPrice = buyPrice || 0
-        await this.lastOrderUpdate()
+        await this.checkLastOrderIsFilled()
+        this.referee.updatePosition('BOUGHT')
       } catch (err) {
         console.log(err)
         this.orderLock = false
@@ -122,21 +124,22 @@ class CryptoAppService {
   async sell() {
     if (!this.orderLock){
       try{
-        this.referee.updatePosition('EMPTY')
         const sellPrice = await this.orderService.createSellOrder({
           PairInfo: this.pair, 
           quantity: this.wallet.getBalance().toSell.available 
         })
         this.orderLock = true
         this.sellPrice = sellPrice || 0
-        await this.lastOrderUpdate()
+        await this.checkLastOrderIsFilled()
         this.calculateProfit()
+        this.referee.updatePosition('EMPTY')
       } catch (err) {
         console.log(err)
         this.orderLock = false
       }
     } else {
-      const lastOrder = this.wallet.getLastOrder()
+      const lastOrder = await this.wallet.getLastOrder()
+      if(!lastOrder) return
       logger.log({from: 'CRYPTO APP', message: 'On order lock. Waiting current order to finish'})
       logger.log({from: 'CRYPTO APP', message: `Order: ${lastOrder.id} status: ${lastOrder.status} side: ${lastOrder.side}`})
     }
@@ -150,9 +153,12 @@ class CryptoAppService {
     }
   }
 
-  async lastOrderUpdate() {
+  async checkLastOrderIsFilled() {
     const interval = setInterval(async () => {
-      const lastOrder = this.wallet.getLastOrder()
+      const lastOrder = await this.wallet.getLastOrder()
+
+      if(!lastOrder) return 
+
       if(lastOrder.status === 'FILLED') {
         logger.log({from: 'CRYPTO APP', message: `Order filled: ${lastOrder.id}`, type: 'SUCCESS'})
         clearInterval(interval)
@@ -180,6 +186,31 @@ class CryptoAppService {
         }
       }
     }, 5000)
+  }
+
+  routineLog() {
+    setTimeout(async () => {
+      try {
+        const lastOrder = await this.wallet.getLastOrder()
+        const currentPrice = await binanceClient.currentPrice(this.pair.pair)
+        if(!lastOrder) return
+          
+        const position = this.referee.currentPosition
+        
+        this.wallet.balanceUpdateLog()
+        logger.log({ from: 'CRYPTO APP', message: `Using ${this.pair.pair}`})
+        logger.log({ from: 'CRYPTO APP', message: `Price ${currentPrice}`})
+        logger.log({ from: 'CRYPTO APP', message: `Logging last Order:`})
+        logger.log({ from: 'CRYPTO APP', message: `Status: ${lastOrder.status} \tside: ${lastOrder.side}` })
+        logger.log({ from: 'CRYPTO APP', message: `quantity: ${lastOrder.quantity} \tprice: ${lastOrder.price}` })
+        logger.log({ from: 'REFEREE', message: `Current Position: ${position}` })
+          logger.log({ from: 'CRYPTO APP', message: `Next log in 20s` })
+      } catch (err) {
+        logger.log({ from: 'CRYPTO APP', message: `Error on routine log`, type: 'ERROR'})
+      } finally{
+        setTimeout(() => this.routineLog(), 20000)
+      }
+    }, 60000)
   }
 }
 

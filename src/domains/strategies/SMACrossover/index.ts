@@ -47,30 +47,16 @@ export class SmaCrossover extends GenericStrategy {
     this.params = params
 
     this.faster = new SMA()
-    this.faster.config({ initialValues, window: params.faster.window })
+    this.faster.config({ initialValues, window: params.faster.window, log: false })
     
     this.slower = new SMA()
-    this.slower.config({ initialValues, window: params.slower.window })
+    this.slower.config({ initialValues, window: params.slower.window,  log: false })
 
     logger.log({from: 'STRATEGIE', message: `SMA Crossover - initialized`})
 
   }
 
-  decision(): StrategyDecision {
-    const currentFasterSmaValue = this.faster.lastSma()
-    const currentSlowerSmaValue = this.slower.lastSma()
-
-    if(currentFasterSmaValue>currentSlowerSmaValue){
-      return 'TO_BUY'
-    }
-    
-    if(currentFasterSmaValue<currentSlowerSmaValue){
-      return 'TO_SELL'
-    }
-    return 'NOTHING'
-  }
-
-  verifyOpportunity() {
+  decision() {
     const currentFasterSmaValue = this.faster.lastSma()
     const currentSlowerSmaValue = this.slower.lastSma()
 
@@ -84,11 +70,9 @@ export class SmaCrossover extends GenericStrategy {
   }
 
   async update(newCandle: Candlestick) {
-    // logger.log('STRATEGIE', `SMA Crossover - updating faster model`)
     this.faster.update(newCandle, false)
-    // logger.log('STRATEGIE', `SMA Crossover - updating slower model`)
     this.slower.update(newCandle, false)
-    // this.log()
+    this.log()
   }
 
   log() {

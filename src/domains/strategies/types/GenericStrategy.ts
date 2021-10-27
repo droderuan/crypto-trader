@@ -10,7 +10,7 @@ export abstract class GenericStrategy {
 
   abstract update(newCandle: Candlestick): void
 
-  abstract verifyOpportunity(): StrategyDecision
+  abstract decision(): StrategyDecision
 
   abstract updateCandleReference(position: Position): void
 }
